@@ -59,6 +59,8 @@ pub fn load_logic(env: &mut REnv) {
 }
 
 // TODO: implement max and min in arithmetic module
+// find a way to report an unbound symbol
+// perhaps get_value could return an error, and we set to an external var
 macro_rules! rval_logic {
     ($lop: ident) => {
         fn $lop(args: &[RVal], env: &REnv) -> RVal {
@@ -69,7 +71,14 @@ macro_rules! rval_logic {
                     _ => _x0,
                 };
                 match xs.first() {
-                    Some(v) => x0.$lop(v) && varlop(v, &xs[1..], env),
+                    Some(ref _v) => {
+                        let _v0 = env.get_value(_v);
+                        let v = match &_v0 {
+                            RNil => _v.clone(),
+                            _ => &_v0,
+                        };
+                        x0.$lop(v) && varlop(v, &xs[1..], env)
+                    },
                     None => true,
                 }
             }
