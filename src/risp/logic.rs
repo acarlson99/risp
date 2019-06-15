@@ -58,6 +58,7 @@ pub fn load_logic(env: &mut REnv) {
     env.def(">=", RBfn(ge));
 }
 
+// TODO: implement max and min in arithmetic module
 macro_rules! rval_logic {
     ($lop: ident) => {
         fn $lop(args: &[RVal], env: &REnv) -> RVal {

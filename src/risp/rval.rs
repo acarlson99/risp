@@ -166,7 +166,7 @@ impl fmt::Display for RVal {
                 let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
                 format!("({})", xs.join(" "))
             }
-            RBfn(_) => format!("Builtin-Fn at {:?}", (&self as *const _)),
+            RBfn(_) => "Builtin-Fn".to_string(),
         };
         write!(f, "{}", s)
     }

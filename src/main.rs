@@ -1,12 +1,38 @@
 #[macro_use]
 extern crate lazy_static;
+extern crate rustyline;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 
 #[macro_use]
 mod risp;
 use risp::{rep, REnv, RErr, RStr, RSym, RVal, RVal::*};
 
+const REPL0 : &str = include_str!("../res/repl_logo");
+const REPL1 : &str = "# ";
+
+// TODO: autocompletion
 fn main() {
     let mut env = REnv::new();
-    println!("{}", risp::rep("(def PI 3.14)", &mut env));
-    println!("{}", risp::rep("(= PI 3.14 3.14)", &mut env));
+    let mut r1 = Editor::<()>::new();
+    println!("{}", REPL0);
+    loop {
+        let readline = r1.readline(REPL1);
+        match readline {
+            Ok(line) => {
+                let linestr = line.as_str();
+                r1.add_history_entry(linestr);
+                //r1.save_history("res/repl_history").unwrap();
+                if line.len() > 0 {
+                    println!("{}", rep(line, &mut env));
+                }
+            },
+            Err(ReadlineError::Interrupted) => break,
+            Err(ReadlineError::Eof) => break,
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break
+            },
+        }
+    }
 }
