@@ -1,6 +1,7 @@
 /******************************************************************************
-** @crates
+** @crates and modules
 ******************************************************************************/
+
 use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, Div, Mul, Rem, Shl, Shr, Sub};
@@ -43,6 +44,13 @@ rval_impl_s! {RStr, RVal::_RStr}
 rval_impl_s! {RSym, RVal::_RSym}
 
 // error messages
+#[allow(non_snake_case)]
+macro_rules! RErrUnexpected {
+    ($unexpected: expr) => {
+        RErr(format!("unexpected {}", $unexpected))
+    };
+}
+
 #[allow(non_snake_case)]
 macro_rules! RErrExpected {
     ($expected: expr, $received: expr) => {
@@ -92,7 +100,7 @@ impl PartialOrd for RVal {
 ** @arithmetic operators
 ******************************************************************************/
 
-// Operations for floats and integers
+// operations for floats and integers
 macro_rules! rval_impl_op {
     ($tname: ty, $op: ident, $cop: ident, $msg: expr) => {
         impl $tname for RVal {
@@ -142,6 +150,9 @@ macro_rules! rval_impl_iop {
         }
     };
 }
+rval_impl_iop! {Rem, rem, checked_rem, "division by zero or arithmetic overflow"}
+
+// integer right and left shifts
 macro_rules! rval_impl_ish {
     ($tname: ty, $op: ident, $cop: ident, $msg: expr) => {
         impl $tname for RVal {
@@ -162,7 +173,6 @@ macro_rules! rval_impl_ish {
         }
     };
 }
-rval_impl_iop! {Rem, rem, checked_rem, "division by zero or arithmetic overflow"}
 rval_impl_ish! {Shl, shl, checked_shl, "arithmetic overflow"}
 rval_impl_ish! {Shr, shr, checked_shr, "arithmetic overflow"}
 

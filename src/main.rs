@@ -1,7 +1,10 @@
 #[macro_use]
+extern crate lazy_static;
+
+#[macro_use]
 mod risp;
 use risp::{RErr, RStr, RSym, RVal, RVal::*};
 
 fn main() {
-    println!("{}", RFlt(3.69) + RFlt(7.28));
+    println!("{}", risp::rep("(3.14 56)"))
 }
