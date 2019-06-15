@@ -65,7 +65,7 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
     loop {
         let (next, rest) = xs.split_first().ok_or_else(|| RErrUnexpected!("EOF"))?;
         if next == end {
-            return Ok((RVec(Arc::new(vs)), rest));  // TODO: macro that inserts nil at end
+            return Ok((RVec(Arc::new(vs)), rest)); // TODO: macro that inserts nil at end
         }
         let (new_vs, new_xs) = parse(&xs)?;
         vs.push(new_vs);

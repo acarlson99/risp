@@ -6,7 +6,7 @@ use std::fmt;
 use std::ops::{Add, Div, Mul, Rem, Shl, Shr, Sub};
 use std::sync::Arc;
 
-use crate::risp::{REnv};
+use crate::risp::REnv;
 
 /******************************************************************************
 ** @base data types
@@ -22,7 +22,7 @@ pub enum RVal {
     RFlt(f64),
     RInt(i64),
     RVec(Arc<Vec<RVal>>),
-    RBfn(fn (&[RVal], &REnv) -> RVal),
+    RBfn(fn(&[RVal], &REnv) -> RVal),
 }
 
 /******************************************************************************
@@ -165,7 +165,7 @@ impl fmt::Display for RVal {
             RVec(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
                 format!("({})", xs.join(" "))
-            },
+            }
             RBfn(_) => format!("Builtin-Fn at {:?}", (&self as *const _)),
         };
         write!(f, "{}", s)
@@ -186,7 +186,7 @@ impl RVal {
             RVec(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.variant()).collect();
                 format!("({})", xs.join(" "))
-            },
+            }
             RBfn(_) => "Builtin-Fn".to_string(),
         }
     }

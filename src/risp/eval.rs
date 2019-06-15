@@ -51,8 +51,8 @@ fn eval(val: &RVal, env: &mut REnv) -> RVal {
                     RBfn(f) => {
                         // TODO: implement macro that adds nil
                         f(xs, env)
-                    },
-                    _ => RErrExpected!("(Fn)", x.variant())
+                    }
+                    _ => RErrExpected!("(Fn)", x.variant()),
                 },
                 _ => is_builtin,
             }

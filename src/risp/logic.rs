@@ -5,7 +5,7 @@
 use std::cmp::Ordering;
 use std::sync::Arc;
 
-use crate::risp::{RErr, RStr, RSym, RVal, RVal::*, REnv};
+use crate::risp::{REnv, RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
 ** @logical operators
@@ -51,35 +51,39 @@ impl PartialOrd for RVal {
 
 pub fn load_logic(env: &mut REnv) {
     env.def("=", RBfn(eq));
-//    env.def("!=", RBfn(ne));
+    env.def("!=", RBfn(ne));
+    env.def("<", RBfn(lt));
+    env.def("<=", RBfn(le));
+    env.def(">", RBfn(gt));
+    env.def(">=", RBfn(ge));
 }
 
-macro_rules! varlogic {
-    ($fname: ident, $lop: ident) => {
-        fn $fname(_x: &RVal, xs: &[RVal], env: &REnv) -> bool {
-            let _x0 = env.get_value(_x);
-            let x0 = match &_x0 {
-                RNil => RNil,
-                _ => _x0,
-            };
-            match xs.first() {
-                Some(v) => {
-                    x0.$lop(v) && $fname(v, &xs[1..], env)
-                },
-                None => true,
+macro_rules! rval_logic {
+    ($lop: ident) => {
+        fn $lop(args: &[RVal], env: &REnv) -> RVal {
+            fn varlop(_x: &RVal, xs: &[RVal], env: &REnv) -> bool {
+                let _x0 = env.get_value(_x);
+                let x0 = match &_x0 {
+                    RNil => _x.clone(),
+                    _ => _x0,
+                };
+                match xs.first() {
+                    Some(v) => x0.$lop(v) && varlop(v, &xs[1..], env),
+                    None => true,
+                }
+            }
+            if args.len() > 1 {
+                RBool(varlop(&args[0], &args[1..], env))
+            } else {
+                RErrExpected!("(T T ...)", "TODO: VEC MACRO")
             }
         }
     };
 }
 
-fn eq(args: &[RVal], env: &REnv) -> RVal {
-    varlogic!(vareq, eq);
-    if args.len() > 1 {
-        RBool(vareq(&args[0], &args[1..], env))
-    } else {
-        RErrExpected!("(Any Any ...)",
-        RVec(Arc::new(args.to_vec())).variant())
-        // TODO: vec macroooo
-    }
-}
-
+rval_logic! {eq}
+rval_logic! {ne}
+rval_logic! {lt}
+rval_logic! {le}
+rval_logic! {gt}
+rval_logic! {ge}

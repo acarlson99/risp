@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{RErr, RStr, RSym, RVal, RVal::*, load_logic};
+use crate::risp::{load_logic, RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
 ** @environment
@@ -36,8 +36,8 @@ impl REnv {
             _RSym(s) => match self.symbols.get(&s.to_string()) {
                 Some(v) => v.clone(),
                 None => RNil,
-            }
-            _ => RErrExpected!("(Sym)", key.variant()),
+            },
+            _ => RNil,
         }
     }
 }
@@ -64,11 +64,21 @@ impl REnv {
                 _RSym(s) => self.def(&s[..], xs[0].clone()),
                 _ => RErrExpected!(
                     "(Sym Any)",
-                    format!("({} {})", x.clone().variant(), RVec(Arc::new(xs.to_vec())).variant()))
+                    format!(
+                        "({} {})",
+                        x.clone().variant(),
+                        RVec(Arc::new(xs.to_vec())).variant()
+                    )
+                ),
             },
             _ => RErrExpected!(
                 "(Sym Any)",
-                    format!("({} {})", x.clone().variant(), RVec(Arc::new(xs.to_vec())).variant())),
+                format!(
+                    "({} {})",
+                    x.clone().variant(),
+                    RVec(Arc::new(xs.to_vec())).variant()
+                )
+            ),
         }
     }
     pub fn is_function(&self, x: &RVal) -> RVal {
@@ -79,8 +89,8 @@ impl REnv {
                     Some(f) => f.clone(),
                     None => RNil,
                 }
-            },
-            _ =>RNil,
+            }
+            _ => RNil,
         }
     }
 }
