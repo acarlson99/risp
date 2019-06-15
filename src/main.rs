@@ -3,8 +3,9 @@ extern crate lazy_static;
 
 #[macro_use]
 mod risp;
-use risp::{RErr, RStr, RSym, RVal, RVal::*};
+use risp::{RErr, RStr, RSym, RVal, RVal::*, REnv, rep};
 
 fn main() {
-    println!("{}", risp::rep("(3.14 56)"))
+    let mut env = REnv::new();
+    println!("{}", risp::rep("PI", &mut env))
 }

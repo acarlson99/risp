@@ -58,6 +58,13 @@ macro_rules! RErrExpected {
     };
 }
 
+#[allow(non_snake_case)]
+macro_rules! RErrUnboundSymbol {
+    ($symbol: expr) => {
+        RErr(format!("unbound symbol {}", $symbol))
+    };
+}
+
 /******************************************************************************
 ** @logical operators
 ******************************************************************************/

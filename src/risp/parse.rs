@@ -8,15 +8,16 @@ use regex::Regex;
 
 use std::sync::Arc;
 
-use crate::risp::{
-    RVal, RErr, RStr, RSym, RVal::*,
-};
+use crate::risp::{RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
 ** @lexer
 ******************************************************************************/
 
-pub fn tokenize<S>(src: S) -> Vec<String> where S: Into<String> {
+pub fn tokenize<S>(src: S) -> Vec<String>
+where
+    S: Into<String>,
+{
     lazy_static! {
         static ref RE: Regex = Regex::new(
             r#"(?mx)
@@ -39,9 +40,7 @@ pub fn tokenize<S>(src: S) -> Vec<String> where S: Into<String> {
 ******************************************************************************/
 
 pub fn parse<'a>(tokens: &'a [String]) -> Result<(RVal, &'a [String]), RVal> {
-    let (head, rest) = tokens
-        .split_first()
-        .ok_or_else(|| RErrUnexpected!("EOF"))?;
+    let (head, rest) = tokens.split_first().ok_or_else(|| RErrUnexpected!("EOF"))?;
     match &head[..] {
         "(" => read_rest(rest, ")"),
         ")" => Err(RErrUnexpected!(")")),
@@ -64,9 +63,7 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
     let mut vs = vec![];
     let mut xs = tokens;
     loop {
-        let (next, rest) = xs
-            .split_first()
-            .ok_or_else(|| RErrUnexpected!("EOF"))?;
+        let (next, rest) = xs.split_first().ok_or_else(|| RErrUnexpected!("EOF"))?;
         if next == end {
             return Ok((RVec(Arc::new(vs)), rest));
         }

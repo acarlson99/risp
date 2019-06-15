@@ -7,3 +7,6 @@ pub use self::parse::*;
 
 mod eval;
 pub use self::eval::*;
+
+mod renv;
+pub use self::renv::*;

@@ -2,21 +2,53 @@
 ** @crates and modules
 ******************************************************************************/
 
-use crate::risp::{
-    RVal, RErr, RStr, RSym, RVal::*,
-    parse, tokenize,
-};
+use crate::risp::{parse, tokenize, REnv, RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
 ** @read-eval-print
 ******************************************************************************/
 
-// TODO: add environment and eval
-pub fn rep<S>(expr: S) -> RVal where S: Into<String> {
+pub fn rep<S>(expr: S, env: &mut REnv) -> RVal
+where
+    S: Into<String>,
+{
     let tokens = tokenize(expr.into());
     let parsed = parse(&tokens);
     match parsed {
-        Ok(v) => v.0,
+        Ok(v) => eval(&v.0, env),
         Err(e) => e,
+    }
+}
+
+/******************************************************************************
+** @eval
+******************************************************************************/
+
+fn eval(val: &RVal, env: &mut REnv) -> RVal {
+    match val {
+        _RSym(s) => {
+            let _r = env
+                .symbols
+                .get(&s.to_string())
+                .ok_or_else(|| RErrUnboundSymbol!(s))
+                .map(|x| x.clone());
+            match _r {
+                Ok(v) => v,
+                Err(e) => e,
+            }
+        }
+        RVec(vs) => {
+            let x = &vs[0];
+            let xs = &vs[1..];
+            let is_builtin = env.try_builtin(x, xs);
+            match is_builtin {
+                RNil => match x {
+                    // Not a native symbol
+                    _ => RErr("FUNCTIONS NOT HERE YET"),
+                },
+                _ => is_builtin,
+            }
+        }
+        _ => val.clone(),
     }
 }
