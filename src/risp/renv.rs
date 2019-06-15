@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{RErr, RStr, RSym, RVal, RVal::*};
+use crate::risp::{RErr, RStr, RSym, RVal, RVal::*, load_logic};
 
 /******************************************************************************
 ** @environment
@@ -18,16 +18,27 @@ pub struct REnv {
 
 impl REnv {
     pub fn new() -> Self {
-        REnv {
+        let mut env = REnv {
             symbols: FnvHashMap::default(),
-        }
+        };
+        load_logic(&mut env);
+        env
     }
-    fn def<S>(&mut self, key: S, val: RVal) -> RVal
+    pub fn def<S>(&mut self, key: S, val: RVal) -> RVal
     where
         S: Into<String>,
     {
         self.symbols.insert(key.into(), val.clone());
         val
+    }
+    pub fn get_value(&self, key: &RVal) -> RVal {
+        match &key {
+            _RSym(s) => match self.symbols.get(&s.to_string()) {
+                Some(v) => v.clone(),
+                None => RNil,
+            }
+            _ => RErrExpected!("(Sym)", key.variant()),
+        }
     }
 }
 
@@ -58,6 +69,18 @@ impl REnv {
             _ => RErrExpected!(
                 "(Sym Any)",
                     format!("({} {})", x.clone().variant(), RVec(Arc::new(xs.to_vec())).variant())),
+        }
+    }
+    pub fn is_function(&self, x: &RVal) -> RVal {
+        match &x {
+            _RSym(s) => {
+                let v = self.symbols.get(&s.to_string());
+                match v {
+                    Some(f) => f.clone(),
+                    None => RNil,
+                }
+            },
+            _ =>RNil,
         }
     }
 }

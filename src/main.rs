@@ -7,5 +7,6 @@ use risp::{RErr, RStr, RSym, RVal, RVal::*, REnv, rep};
 
 fn main() {
     let mut env = REnv::new();
-    println!("{}", risp::rep("PI", &mut env))
+    println!("{}", risp::rep("(def PI 3.14)", &mut env));
+    println!("{}", risp::rep("(= PI 3.14)", &mut env));
 }

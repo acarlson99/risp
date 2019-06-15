@@ -2,6 +2,8 @@
 ** @crates and modules
 ******************************************************************************/
 
+use std::sync::Arc;
+
 use crate::risp::{parse, tokenize, REnv, RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
@@ -25,7 +27,7 @@ where
 ******************************************************************************/
 
 fn eval(val: &RVal, env: &mut REnv) -> RVal {
-    match val {
+    match &val {
         _RSym(s) => {
             let _r = env
                 .symbols
@@ -38,13 +40,19 @@ fn eval(val: &RVal, env: &mut REnv) -> RVal {
             }
         }
         RVec(vs) => {
+            if vs.len() < 2 {
+                return RErrExpected!("(Any ...)", val.variant());
+            }
             let x = &vs[0];
             let xs = &vs[1..];
             let is_builtin = env.try_builtin(x, xs);
             match is_builtin {
-                RNil => match x {
-                    // Not a native symbol
-                    _ => RErr("FUNCTIONS NOT HERE YET"),
+                RNil => match env.is_function(&x) {
+                    RBfn(f) => {
+                        // TODO: implement macro that adds nil
+                        f(xs, env)
+                    },
+                    _ => RErrExpected!("(Fn)", x.variant())
                 },
                 _ => is_builtin,
             }

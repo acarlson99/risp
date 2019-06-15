@@ -10,3 +10,7 @@ pub use self::eval::*;
 
 mod renv;
 pub use self::renv::*;
+
+#[macro_use]
+mod logic;
+pub use self::logic::*;
