@@ -22,7 +22,7 @@ fn main() {
             Ok(line) => {
                 let linestr = line.as_str();
                 r1.add_history_entry(linestr);
-                //r1.save_history("res/repl_history").unwrap();
+                r1.save_history("res/repl_history").unwrap();
                 if !line.is_empty() {
                     println!("{}", rep(line, &mut env));
                 }
