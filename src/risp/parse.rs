@@ -43,11 +43,11 @@ pub fn parse<'a>(tokens: &'a [String]) -> Result<(RVal, &'a [String]), RVal> {
     let (head, rest) = tokens.split_first().ok_or_else(|| RErrUnexpected!("EOF"))?;
     match &head[..] {
         "(" => read_rest(rest, ")"),
-        ")" => Err(RErrUnexpected!(")")),
+        ")" => Err(RErrUnexpected!("')'")),
         "[" => read_rest(rest, "]"),
-        "]" => Err(RErrUnexpected!("]")),
+        "]" => Err(RErrUnexpected!("']'")),
         "{" => read_rest(rest, "}"),
-        "}" => Err(RErrUnexpected!("}")),
+        "}" => Err(RErrUnexpected!("'}'")),
         _ => {
             let atom = parse_atom(head);
             match atom {
@@ -63,7 +63,7 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
     let mut vs = vec![];
     let mut xs = tokens;
     loop {
-        let (next, rest) = xs.split_first().ok_or_else(|| RErrExpected!(end, "EOF"))?;
+        let (next, rest) = xs.split_first().ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
         if next == end {
             return Ok((RVec(Arc::new(vs)), rest)); // TODO: macro that inserts nil at end
         }
@@ -111,7 +111,7 @@ fn parse_atom(atom: &str) -> RVal {
             } else if STR_RE.is_match(&atom) {
                 RStr(unescape(&atom[1..atom.len() - 1]))
             } else if atom.starts_with('"') {
-                RErrExpected!("\"", "EOF")
+                RErrExpected!("'\"'", "EOF")
             } else {
                 RSym(atom)
             }

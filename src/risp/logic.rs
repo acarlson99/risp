@@ -64,9 +64,13 @@ pub fn load_logic(env: &mut REnv) {
 macro_rules! rval_logic {
     ($lop: ident) => {
         fn $lop(args: &[RVal], env: &REnv) -> RVal {
-            fn varlop(_x: &RVal, xs: &[RVal], env: &REnv) -> bool {
+            fn varlop(res: &mut RVal, env: &REnv, _x: &RVal, xs: &[RVal]) -> bool {
                 let _x0 = env.get_value(_x);
                 let x0 = match &_x0 {
+                    _RErr(e) => {
+                        *res = _x0.clone();
+                        _x0
+                    }
                     RNil => _x.clone(),
                     _ => _x0,
                 };
@@ -74,16 +78,25 @@ macro_rules! rval_logic {
                     Some(ref _v) => {
                         let _v0 = env.get_value(_v);
                         let v = match &_v0 {
+                            _RErr(e) => {
+                                *res = _v0.clone();
+                                &_v0
+                            },
                             RNil => _v.clone(),
                             _ => &_v0,
                         };
-                        x0.$lop(v) && varlop(v, &xs[1..], env)
+                        x0.$lop(v) && varlop(res, env, v, &xs[1..])
                     },
                     None => true,
                 }
             }
             if args.len() > 1 {
-                RBool(varlop(&args[0], &args[1..], env))
+                let mut res = RNil;
+                let b = varlop(&mut res, env, &args[0], &args[1..]);
+                match &res {
+                    RNil => RBool(b),
+                    _ => res.clone(),
+                }
             } else {
                 RErrExpected!("(T T ...)", "TODO: VEC MACRO")
             }

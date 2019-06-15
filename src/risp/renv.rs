@@ -35,7 +35,7 @@ impl REnv {
         match &key {
             _RSym(s) => match self.symbols.get(&s.to_string()) {
                 Some(v) => v.clone(),
-                None => RNil,
+                None => RErrUnboundSymbol!(key),
             },
             _ => RNil,
         }
