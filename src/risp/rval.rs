@@ -22,7 +22,7 @@ pub enum RVal {
     RFlt(f64),
     RInt(i64),
     RVec(Arc<Vec<RVal>>),
-    RBfn(fn(&[RVal], &REnv) -> RVal),
+    RBfn(fn(&[RVal], &mut REnv) -> RVal),
 }
 
 /******************************************************************************

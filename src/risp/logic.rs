@@ -4,7 +4,7 @@
 
 use std::cmp::Ordering;
 
-use crate::risp::{REnv, RErr, RVal, RVal::*};
+use crate::risp::{eval, REnv, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @logical operators
@@ -62,29 +62,12 @@ pub fn load_logic(env: &mut REnv) {
 // perhaps get_value could return an error, and we set to an external var
 macro_rules! rval_logic {
     ($lop: ident) => {
-        fn $lop(args: &[RVal], env: &REnv) -> RVal {
-            fn varlop(res: &mut RVal, env: &REnv, _x: &RVal, xs: &[RVal]) -> bool {
-                let _x0 = env.get_value(_x);
-                let x0 = match &_x0 {
-                    _RErr(_) => {
-                        *res = _x0.clone();
-                        _x0
-                    }
-                    RNil => _x.clone(),
-                    _ => _x0,
-                };
+        fn $lop(args: &[RVal], env: &mut REnv) -> RVal {
+            fn varlop(res: &mut RVal, env: &mut REnv, x0: &RVal, xs: &[RVal]) -> bool {
                 match xs.first() {
                     Some(ref _v) => {
-                        let _v0 = env.get_value(_v);
-                        let v = match &_v0 {
-                            _RErr(_) => {
-                                *res = _v0.clone();
-                                &_v0
-                            }
-                            RNil => _v.clone(),
-                            _ => &_v0,
-                        };
-                        x0.$lop(v) && varlop(res, env, v, &xs[1..])
+                        let v = eval(_v, env);
+                        eval(x0, env).$lop(&v) && varlop(res, env, &v, &xs[1..])
                     }
                     None => true,
                 }
