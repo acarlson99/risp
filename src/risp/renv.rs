@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{eval, load_logic, RErr, RVal, RVal::*};
+use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @environment
@@ -21,6 +21,7 @@ impl REnv {
         let mut env = REnv {
             symbols: FnvHashMap::default(),
         };
+        load_arithmetic(&mut env);
         load_logic(&mut env);
         env
     }
@@ -30,15 +31,6 @@ impl REnv {
     {
         self.symbols.insert(key.into(), val.clone());
         val
-    }
-    pub fn get_value(&self, key: &RVal) -> RVal {
-        match &key {
-            _RSym(s) => match self.symbols.get(&s.to_string()) {
-                Some(v) => v.clone(),
-                None => RErrUnboundSymbol!(key),
-            },
-            _ => RNil,
-        }
     }
 }
 

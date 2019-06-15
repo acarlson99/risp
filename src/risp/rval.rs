@@ -3,7 +3,6 @@
 ******************************************************************************/
 
 use std::fmt;
-use std::ops::{Add, Div, Mul, Rem, Shl, Shr, Sub};
 use std::sync::Arc;
 
 use crate::risp::REnv;
@@ -68,86 +67,6 @@ macro_rules! RErrUnboundSymbol {
 }
 
 /******************************************************************************
-** @arithmetic operators
-******************************************************************************/
-
-// operations for floats and integers
-macro_rules! rval_impl_op {
-    ($tname: ty, $op: ident, $cop: ident, $msg: expr) => {
-        impl $tname for RVal {
-            type Output = RVal;
-            fn $op(self, other: Self) -> Self {
-                use RVal::*;
-                match (&self, &other) {
-                    (RFlt(a), RFlt(b)) => RFlt(a.$op(b)),
-                    (RFlt(a), RInt(b)) => RFlt(a.$op(*b as f64)),
-                    (RInt(a), RFlt(b)) => RFlt((*a as f64).$op(b)),
-                    (RInt(a), RInt(b)) => match a.$cop(*b) {
-                        Some(c) => RInt(c),
-                        None => RErr($msg),
-                    },
-                    _ => RErrExpected!(
-                        "(Num Num)",
-                        format!("({} {})", self.clone().variant(), other.clone().variant())
-                    ),
-                }
-            }
-        }
-    };
-}
-rval_impl_op! {Add, add, checked_add, "arithmetic overflow"}
-rval_impl_op! {Sub, sub, checked_sub, "arithmetic overflow"}
-rval_impl_op! {Mul, mul, checked_mul, "arithmetic overflow"}
-rval_impl_op! {Div, div, checked_div, "division by zero or arithmetic overflow"}
-
-// operations for integers only
-macro_rules! rval_impl_iop {
-    ($tname: ty, $op: ident, $cop: ident, $msg: expr) => {
-        impl $tname for RVal {
-            type Output = RVal;
-            fn $op(self, other: Self) -> Self {
-                use RVal::*;
-                match (&self, &other) {
-                    (RInt(a), RInt(b)) => match a.$cop(*b) {
-                        Some(c) => RInt(c),
-                        None => RErr($msg),
-                    },
-                    _ => RErrExpected!(
-                        "(Int Int)",
-                        format!("({} {})", self.clone().variant(), other.clone().variant())
-                    ),
-                }
-            }
-        }
-    };
-}
-rval_impl_iop! {Rem, rem, checked_rem, "division by zero or arithmetic overflow"}
-
-// integer right and left shifts
-macro_rules! rval_impl_ish {
-    ($tname: ty, $op: ident, $cop: ident, $msg: expr) => {
-        impl $tname for RVal {
-            type Output = RVal;
-            fn $op(self, other: Self) -> Self {
-                use RVal::*;
-                match (&self, &other) {
-                    (RInt(a), RInt(b)) => match a.$cop(*b as u32) {
-                        Some(c) => RInt(c),
-                        None => RErr($msg),
-                    },
-                    _ => RErrExpected!(
-                        "(Int Int)",
-                        format!("({} {})", self.clone().variant(), other.clone().variant())
-                    ),
-                }
-            }
-        }
-    };
-}
-rval_impl_ish! {Shl, shl, checked_shl, "arithmetic overflow"}
-rval_impl_ish! {Shr, shr, checked_shr, "arithmetic overflow"}
-
-/******************************************************************************
 ** @output
 ******************************************************************************/
 
@@ -176,7 +95,7 @@ impl RVal {
     pub fn variant(&self) -> String {
         use RVal::*;
         match self {
-            _RErr(_) => "Err".to_string(),
+            _RErr(s) => find_deepest_error(&s[..]),
             _RStr(_) => "Str".to_string(),
             _RSym(_) => "Sym".to_string(),
             RNil => "Nil".to_string(),
@@ -189,5 +108,18 @@ impl RVal {
             }
             RBfn(_) => "Builtin-Fn".to_string(),
         }
+    }
+}
+
+fn find_deepest_error(src: &str) -> String {
+
+// TODO: do not let error propagate
+    let t = &src.to_string().rfind("Err:");
+    println!("{:?}", t);
+    match t {
+        Some(idx) => {
+            format!("{}", src[*idx..].to_string())
+        }
+        None => "NOPE".to_string(),
     }
 }

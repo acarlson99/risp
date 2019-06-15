@@ -14,3 +14,7 @@ pub use self::renv::*;
 #[macro_use]
 mod logic;
 pub use self::logic::*;
+
+#[macro_use]
+mod arithmetic;
+pub use self::arithmetic::*;

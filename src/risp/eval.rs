@@ -38,8 +38,8 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
             }
         }
         RVec(vs) => {
-            if vs.len() < 2 {
-                return RErrExpected!("(Any ...)", val.variant());
+            if vs.is_empty() {
+                return RNil;
             }
             let x = &vs[0];
             let xs = &vs[1..];
