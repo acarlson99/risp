@@ -8,21 +8,24 @@ use rustyline::Editor;
 mod risp;
 use risp::{rep, REnv};
 
-const REPL0: &str = include_str!("../res/repl_logo");
+const REPL0: &str = include_str!("../.repl_logo");
 const REPL1: &str = "# ";
 
 // TODO: autocompletion
 fn main() {
     let mut env = REnv::new();
-    let mut r1 = Editor::<()>::new();
+    let mut rl = Editor::<()>::new();
+    match rl.load_history(".repl_history") {
+        _ => (),
+    }
     println!("{}", REPL0);
     loop {
-        let readline = r1.readline(REPL1);
+        let readline = rl.readline(REPL1);
         match readline {
             Ok(line) => {
                 let linestr = line.as_str();
-                r1.add_history_entry(linestr);
-                r1.save_history("res/repl_history").unwrap();
+                rl.add_history_entry(linestr);
+                rl.save_history(".repl_history").unwrap();
                 if !line.is_empty() {
                     println!("{}", rep(line, &mut env));
                 }

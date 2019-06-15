@@ -3,9 +3,8 @@
 ******************************************************************************/
 
 use std::cmp::Ordering;
-use std::sync::Arc;
 
-use crate::risp::{REnv, RErr, RStr, RSym, RVal, RVal::*};
+use crate::risp::{REnv, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @logical operators
@@ -67,7 +66,7 @@ macro_rules! rval_logic {
             fn varlop(res: &mut RVal, env: &REnv, _x: &RVal, xs: &[RVal]) -> bool {
                 let _x0 = env.get_value(_x);
                 let x0 = match &_x0 {
-                    _RErr(e) => {
+                    _RErr(_) => {
                         *res = _x0.clone();
                         _x0
                     }
@@ -78,15 +77,15 @@ macro_rules! rval_logic {
                     Some(ref _v) => {
                         let _v0 = env.get_value(_v);
                         let v = match &_v0 {
-                            _RErr(e) => {
+                            _RErr(_) => {
                                 *res = _v0.clone();
                                 &_v0
-                            },
+                            }
                             RNil => _v.clone(),
                             _ => &_v0,
                         };
                         x0.$lop(v) && varlop(res, env, v, &xs[1..])
-                    },
+                    }
                     None => true,
                 }
             }

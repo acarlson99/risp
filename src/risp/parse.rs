@@ -63,7 +63,9 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
     let mut vs = vec![];
     let mut xs = tokens;
     loop {
-        let (next, rest) = xs.split_first().ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
+        let (next, rest) = xs
+            .split_first()
+            .ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
         if next == end {
             return Ok((RVec(Arc::new(vs)), rest)); // TODO: macro that inserts nil at end
         }

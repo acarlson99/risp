@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{load_logic, RErr, RStr, RSym, RVal, RVal::*};
+use crate::risp::{load_logic, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @environment

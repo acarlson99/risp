@@ -21,7 +21,7 @@ fn main() -> std::io::Result<()> {
             .write(true)
             .truncate(true)
             .create(true)
-            .open("res/repl_logo")?;
+            .open(".repl_logo")?;
         let out = str::from_utf8(&output.stdout).unwrap();
         let txt = format!("{}{}{}", REPL0, out, REPL1);
         res.write_all(txt.as_bytes())?;
