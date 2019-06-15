@@ -2,7 +2,7 @@
 ** @crates and modules
 ******************************************************************************/
 
-use crate::risp::{parse, tokenize, REnv, RErr, RStr, RSym, RVal, RVal::*};
+use crate::risp::{parse, tokenize, REnv, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @read-eval-print
@@ -24,7 +24,7 @@ where
 ** @eval
 ******************************************************************************/
 
-fn eval(val: &RVal, env: &mut REnv) -> RVal {
+pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
     match &val {
         _RSym(s) => {
             let _r = env
