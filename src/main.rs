@@ -6,10 +6,10 @@ use rustyline::Editor;
 
 #[macro_use]
 mod risp;
-use risp::{rep, REnv, RErr, RStr, RSym, RVal, RVal::*};
+use risp::{rep, REnv};
 
-const REPL0 : &str = include_str!("../res/repl_logo");
-const REPL1 : &str = "# ";
+const REPL0: &str = include_str!("../res/repl_logo");
+const REPL1: &str = "# ";
 
 // TODO: autocompletion
 fn main() {
@@ -23,16 +23,16 @@ fn main() {
                 let linestr = line.as_str();
                 r1.add_history_entry(linestr);
                 //r1.save_history("res/repl_history").unwrap();
-                if line.len() > 0 {
+                if !line.is_empty() {
                     println!("{}", rep(line, &mut env));
                 }
-            },
+            }
             Err(ReadlineError::Interrupted) => break,
             Err(ReadlineError::Eof) => break,
             Err(err) => {
                 println!("Error: {:?}", err);
-                break
-            },
+                break;
+            }
         }
     }
 }

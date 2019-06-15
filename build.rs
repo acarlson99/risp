@@ -3,18 +3,18 @@ use std::io::prelude::*;
 use std::process::Command;
 use std::str;
 
-const REPL0 : &str = "
+const REPL0: &str = "
 ██████╗ ██╗███████╗██████╗
 ██╔══██╗██║██╔════╝██╔══██╗
 ██████╔╝██║███████╗██████╔╝
 ██╔══██╗██║╚════██║██╔═══╝
 ██║  ██║██║███████║██║ REPL
 ╚═╝  ╚═╝╚═╝╚══════╝╚═╝ ";
-const REPL1 : &str = "Use Ctrl-C or Ctrl-D to exit REPL";
+const REPL1: &str = "Use Ctrl-C or Ctrl-D to exit REPL";
 
 fn main() -> std::io::Result<()> {
-    let output = Command::new("git").
-        args(&["rev-parse", "--short", "HEAD"])
+    let output = Command::new("git")
+        .args(&["rev-parse", "--short", "HEAD"])
         .output()?;
     if output.status.success() {
         let mut res = OpenOptions::new()
