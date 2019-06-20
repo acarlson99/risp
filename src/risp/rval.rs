@@ -66,6 +66,14 @@ macro_rules! RErrUnboundSymbol {
     };
 }
 
+#[allow(non_snake_case)]
+macro_rules! RErrArgs {
+    ($args: expr) => {
+        RVec(std::sync::Arc::new($args.to_vec())).variant()
+    };
+}
+
+
 /******************************************************************************
 ** @output
 ******************************************************************************/
@@ -95,7 +103,7 @@ impl RVal {
     pub fn variant(&self) -> String {
         use RVal::*;
         match self {
-            _RErr(s) => find_deepest_error(&s[..]),
+            _RErr(_) => self.to_string(),  // TODO: use queue for errors
             _RStr(_) => "Str".to_string(),
             _RSym(_) => "Sym".to_string(),
             RNil => "Nil".to_string(),
@@ -108,18 +116,5 @@ impl RVal {
             }
             RBfn(_) => "Builtin-Fn".to_string(),
         }
-    }
-}
-
-fn find_deepest_error(src: &str) -> String {
-
-// TODO: do not let error propagate
-    let t = &src.to_string().rfind("Err:");
-    println!("{:?}", t);
-    match t {
-        Some(idx) => {
-            format!("{}", src[*idx..].to_string())
-        }
-        None => "NOPE".to_string(),
     }
 }

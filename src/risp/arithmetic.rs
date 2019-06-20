@@ -120,7 +120,7 @@ macro_rules! rval_varop {
                 _ => None,
             }).next();
             */
-            RErrExpected!("(Num Num ...)", "TODO: VEC MACRO")
+            RErrExpected!("(Num Num ...)", RErrArgs!($args))
         }
     };
 }
@@ -142,30 +142,3 @@ rval_arithmetic! {add, 0, RInt(0)}
 rval_arithmetic! {div, 1}
 rval_arithmetic! {mul, 0, RInt(1)}
 rval_arithmetic! {sub, 1}
-
-
-/*
-fn add(args: &[RVal], env: &mut REnv) -> RVal {
-
-    rval_varop!{add, env, args, args, RInt(0)}
-    /*
-    rval_arithmetic!(add, env);
-    if args.len() > 1 {
-        args.iter().fold(RInt(0), |acc, x| binop(acc, x, env))
-    } else {
-        RErrExpected!("(Num Num ...)", "TODO: VEC MACRO")
-    }
-    */
-}
-*/
-
-/*
-fn sub(args: &[RVal], env: &mut REnv) -> RVal {
-    rval_arithmetic!(add, env);
-    if args.len() > 1 {
-        args[1..].iter().fold(args[0].clone(), |acc, x| binop(acc, x, env))
-    } else {
-        RErrExpected!("(Num Num ...)", "TODO: VEC MACRO")
-    }
-}
-*/
