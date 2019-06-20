@@ -6,8 +6,6 @@ extern crate lazy_static;
 extern crate regex;
 use regex::Regex;
 
-use std::sync::Arc;
-
 use crate::risp::{RErr, RStr, RSym, RVal, RVal::*};
 
 /******************************************************************************
@@ -67,7 +65,7 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
             .split_first()
             .ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
         if next == end {
-            return Ok((RVec(Arc::new(vs)), rest)); // TODO: macro that inserts nil at end
+            return Ok((RVecArgs!(vs), rest));
         }
         let (new_vs, new_xs) = parse(&xs)?;
         vs.push(new_vs);

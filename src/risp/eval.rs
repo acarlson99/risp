@@ -47,7 +47,6 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
             match is_builtin {
                 RNil => match env.is_function(&x) {
                     RBfn(f) => {
-                        // TODO: implement macro that adds nil
                         f(xs, env)
                     }
                     _ => RErrExpected!("Fn", x.variant()),
