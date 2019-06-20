@@ -82,7 +82,7 @@ impl fmt::Display for RVal {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use RVal::*;
         let s = match self {
-            _RErr(e) => format!("Err: {}", e),
+            _RErr(e) => format!("(Err: {})", e),
             _RStr(s) => format!("\"{}\"", s),
             _RSym(s) => s.to_string(),
             RNil => "nil".to_string(),
@@ -103,7 +103,7 @@ impl RVal {
     pub fn variant(&self) -> String {
         use RVal::*;
         match self {
-            _RErr(_) => self.to_string(),  // TODO: use queue for errors
+            _RErr(_) => self.to_string(),
             _RStr(_) => "Str".to_string(),
             _RSym(_) => "Sym".to_string(),
             RNil => "Nil".to_string(),
