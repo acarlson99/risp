@@ -80,7 +80,7 @@ macro_rules! rval_logic {
                     _ => res.clone(),
                 }
             } else {
-                RErrExpected!("(T T ...)", "TODO: VEC MACRO")
+                RErrExpected!("(A A ...)", RVecArgs!(args).variant())
             }
         }
     };

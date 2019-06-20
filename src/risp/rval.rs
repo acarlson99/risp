@@ -67,9 +67,9 @@ macro_rules! RErrUnboundSymbol {
 }
 
 #[allow(non_snake_case)]
-macro_rules! RErrArgs {
+macro_rules! RVecArgs {
     ($args: expr) => {
-        RVec(std::sync::Arc::new($args.to_vec())).variant()
+        RVec(std::sync::Arc::new($args.to_vec()))
     };
 }
 

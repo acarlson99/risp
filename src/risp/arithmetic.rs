@@ -120,7 +120,7 @@ macro_rules! rval_varop {
                 _ => None,
             }).next();
             */
-            RErrExpected!("(Num Num ...)", RErrArgs!($args))
+            RErrExpected!("(Num Num ...)", RVecArgs!($args).variant())
         }
     };
 }
