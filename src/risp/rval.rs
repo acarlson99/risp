@@ -27,6 +27,7 @@ pub enum RVal {
 
 #[derive(Clone)]
 pub struct RLambda {
+    pub env: Arc<REnv>,
     pub params: Arc<RVal>,
     pub body: Arc<RVal>,
 }
@@ -64,6 +65,10 @@ macro_rules! RErrExpected {
     ($expected: expr, $received: expr) => {
         RErr(format!("expected {}, received {}", $expected, $received))
     };
+    ($expected: expr) => {
+        RErr(format!("expected {}", $expected))
+    };
+
 }
 
 #[allow(non_snake_case)]

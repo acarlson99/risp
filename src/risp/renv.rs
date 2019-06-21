@@ -59,15 +59,16 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match x {
             _RSym(s) => match &s[..] {
+                // TODO: fix segfaults
                 "def" => self.builtin_def(&xs[0], &xs[1..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),
-                "defn" => self.builtin_lfn(&xs[0], &xs[1..]),
+                "fn" => self.builtin_lfn(&xs[..]),
                 _ => RNil,
             },
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
     }
-    // TODO: fix error messages
+    // TODO: fix segfault when only def is passed
     fn builtin_def(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match xs.len() {
             0 => RErrExpected!("(Sym Any)", x.variant()),
@@ -78,7 +79,7 @@ impl REnv {
                     format!(
                         "{} {}",
                         x.clone().variant(),
-                        RVec(Arc::new(xs.to_vec())).variant()  // TODO: here and below
+                        RVecArgs!(xs.to_vec()).variant()
                     )
                 ),
             },
@@ -92,6 +93,7 @@ impl REnv {
             ),
         }
     }
+    // TODO: fix possible segfault here
     fn builtin_if(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match xs.len() {
             0 => RErrExpected!("(Bool Any Any)", x.variant()),
@@ -119,26 +121,21 @@ impl REnv {
             ),
         }
     }
-    fn builtin_lfn(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
-        let params = xs.first()
-            .ok_or_else(|| RErr("function parameters"));
-        let body = xs.get(1)
-            .ok_or_else(|| RErr("function body"));
-        if xs.len() > 2 {
-            return RErr(
-            "fn construct only takes a list of parameters and a function body"); 
-        }
-        match (params, body) {
-            (Ok(p), Ok(b)) => match (&p, &b) {
-                (RVec(_), RVec(_)) => self.builtin_def(x, &[RLfn(Arc::new(RLambda {
-                        params: Arc::new(p.clone()),
-                        body: Arc::new(b.clone()),
-                    }))]),
-                _ => RErr("invalid fn construct"),
+    fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            2 => match (&xs[0], &xs[1]) {
+                (RVec(ps), RVec(bs)) => RLfn(Arc::new(RLambda {
+                    env: Arc::new(REnv {
+                        symbols: FnvHashMap::default(),
+                        parent: Some(Arc::new(self.clone())),
+                    }),
+                    params: Arc::new(xs[0].clone()),  // TODO: assure they are symbols
+                    body: Arc::new(xs[1].clone()),
+                })),
+                _=> RErr("parameters and body must be in list form"),
             }
-            _ => RErr("invalid fn construct"),
+            _ => RErrExpected!("(parameters) (body)")
         }
-
     }
 
 
