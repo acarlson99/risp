@@ -67,7 +67,7 @@ impl REnv {
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
     }
-    fn builtin_def(&mut self, xs: &[RVal]) -> RVal {
+    pub fn builtin_def(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             2 => match &xs[0] {
                 _RSym(s) => {

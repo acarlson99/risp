@@ -62,8 +62,9 @@ fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
             RVec(vs) => {
                 let mut new_env = env.clone();
                 for (k, v) in vs.iter().zip(args.iter()) {
+                    let new_val = eval(&v.clone(), &mut new_env);
                     match &k {
-                        _RSym(s) => new_env.def(&s[..], v.clone()),
+                        _RSym(s) => new_env.def(&s[..], new_val),
                         _ => return RErr("internal error (eval_lambda)"),
                     };
                 }
@@ -71,11 +72,6 @@ fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
             },
             _ => RErr("internal error (eval_lambda)"),
         }
-        /*
-        let new_env = env.clone();
-        for (k, v) in lambda.params.iter().zip(args.iter()) {
-            new_env.def(k, v);
-        }*/
     } else {
         RErrExpected!(
             format!("{} arguments", lambda.params.len()),
