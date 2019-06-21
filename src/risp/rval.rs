@@ -27,7 +27,6 @@ pub enum RVal {
 
 #[derive(Clone)]
 pub struct RLambda {
-    pub env: Arc<REnv>,
     pub params: Arc<RVal>,
     pub body: Arc<RVal>,
 }
@@ -85,6 +84,19 @@ macro_rules! RVecArgs {
     };
 }
 
+/******************************************************************************
+** @useful fns
+******************************************************************************/
+
+impl RVal {
+    pub fn len(&self) -> usize {
+        use RVal::*;
+        match self {
+            RVec(vs) => vs.len(),
+            _ => 1,
+        }
+    }
+}
 
 /******************************************************************************
 ** @output

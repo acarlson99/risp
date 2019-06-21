@@ -59,38 +59,24 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match x {
             _RSym(s) => match &s[..] {
-                // TODO: fix segfaults
-                "def" => self.builtin_def(&xs[0], &xs[1..]),
-                "if" => self.builtin_if(&xs[0], &xs[1..]),
+                "def" => self.builtin_def(&xs[..]),
+                "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
                 _ => RNil,
             },
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
     }
-    // TODO: fix segfault when only def is passed
-    fn builtin_def(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
+    fn builtin_def(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            0 => RErrExpected!("(Sym Any)", x.variant()),
-            1 => match x {
-                _RSym(s) => self.def(&s[..], xs[0].clone()),
-                _ => RErrExpected!(
-                    "(Sym Any)",
-                    format!(
-                        "{} {}",
-                        x.clone().variant(),
-                        RVecArgs!(xs.to_vec()).variant()
-                    )
-                ),
+            2 => match &xs[0] {
+                _RSym(s) => {
+                    let new_val = eval(&xs[1], self);
+                    self.def(&s[..], new_val)
+                },
+                _ => RErrExpected!("(Sym Any)", RVecArgs!(xs).variant()),
             },
-            _ => RErrExpected!(
-                "(Sym Any)",
-                format!(
-                    "{} {}",
-                    x.clone().variant(),
-                    RVec(Arc::new(xs.to_vec())).variant()
-                )
-            ),
+            _ => RErrExpected!("(Sym Any)", RVecArgs!(xs).variant()),
         }
     }
     // TODO: fix possible segfault here
@@ -124,27 +110,37 @@ impl REnv {
     fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             2 => match (&xs[0], &xs[1]) {
-                (RVec(ps), RVec(bs)) => RLfn(Arc::new(RLambda {
-                    env: Arc::new(REnv {
-                        symbols: FnvHashMap::default(),
-                        parent: Some(Arc::new(self.clone())),
-                    }),
-                    params: Arc::new(xs[0].clone()),  // TODO: assure they are symbols
-                    body: Arc::new(xs[1].clone()),
-                })),
+                (RVec(ps), RVec(bs)) => {
+                    if REnv::are_symbols(&ps[..]) {
+                        RLfn(Arc::new(RLambda {
+                            params: Arc::new(xs[0].clone()),
+                            body: Arc::new(xs[1].clone()),
+                        }))
+                    } else {
+                        RErr("parameters must be symbols")
+                    }
+                },
                 _=> RErr("parameters and body must be in list form"),
             }
             _ => RErrExpected!("(parameters) (body)")
         }
     }
-
+    fn are_symbols(params: &[RVal]) -> bool {
+        for v in params.iter() {
+            match &v {
+                _RSym(_) => (),
+                _ => return false,
+            }
+        }
+        return true;
+    }
 
     pub fn is_function(&self, x: &RVal) -> RVal {
         match &x {
             _RSym(s) => {
                 let v = self.symbols.get(&s.to_string());
                 match v {
-                    Some(f) => f.clone(),
+                    Some(v) => v.clone(),
                     None => RNil,
                 }
             }
@@ -152,45 +148,4 @@ impl REnv {
         }
     }
 
-}
-
-impl REnv {
-    pub fn lambda_env(&mut self, params: &Arc<RVal>, args: &[RVal]) -> Result<REnv, RVal> {
-        let ks = parse_syms(params.clone())?;
-        if ks.len() != args.len() {
-            return Err(RErrExpected!(format!("{} arguments", ks.len()), args.len()));
-        }
-        let vs = self.eval_syms(args);
-
-        let mut symbols = FnvHashMap::default();
-        for (k, v) in ks.iter().zip(vs.iter()) {
-            symbols.insert(k.clone(), v.clone());
-        }
-        Ok( REnv {
-            symbols: symbols,
-            parent: Some(Arc::new(self.clone())),
-        })
-
-    }
-    fn eval_syms(&mut self, args: &[RVal]) -> Vec<RVal> {
-        args
-            .iter()
-            .map(|x| eval(x, self))
-            .collect()
-    }
-}
-
-fn parse_syms(params: Arc<RVal>) -> Result<Vec<String>, RVal> {
-    match &*params {
-        RVec(vs) => {
-            vs
-                .iter()
-                .map(|x| {
-                    match x {
-                        _RSym(s) => Ok(s.to_string()),
-                        _ => Err(RErr("TODO")),
-                    }}).collect()
-        },
-        _ => Err(RErr("expected parameters to be in a list")),
-    }
 }
