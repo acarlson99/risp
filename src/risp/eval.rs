@@ -56,7 +56,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
     }
 }
 
-fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
+pub fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
     if args.len() == lambda.params.len() {
         match &*lambda.params {
             RVec(vs) => {

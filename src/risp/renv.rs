@@ -6,7 +6,7 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
+use crate::risp::{eval, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
 
 /******************************************************************************
 ** @environment
@@ -15,14 +15,12 @@ use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambd
 #[derive(Clone)]
 pub struct REnv {
     pub symbols: FnvHashMap<String, RVal>,
-    pub parent: Option<Arc<REnv>>,
 }
 
 impl REnv {
     pub fn new() -> Self {
         let mut env = REnv {
             symbols: FnvHashMap::default(),
-            parent: None,
         };
         load_arithmetic(&mut env);
         load_logic(&mut env);
@@ -41,12 +39,7 @@ impl REnv {
     {
         match self.symbols.get(&key.into()[..]) {
             Some(v) => Some(v.clone()),
-            None => {
-                match &self.parent {
-                    Some(parent) => parent.get(&key.into()[..]),
-                    None => None,
-                }
-            },
+            None => None,
         }
     }
 }
@@ -57,13 +50,23 @@ impl REnv {
 
 impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
-        match x {
+        match &x {
             _RSym(s) => match &s[..] {
                 "def" => self.builtin_def(&xs[..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
                 _ => RNil,
             },
+            RVec(vs) => {
+                if vs.is_empty() {
+                    return RErrExpected!("Sym", x.clone().variant())
+                }
+                let new_val = eval(&x, self);
+                match &new_val {
+                    RLfn(lambda) => eval_lambda(lambda, &xs[..], self),
+                    _ => RErrExpected!("Sym", x.clone().variant()),
+                }
+            }
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
     }
@@ -109,8 +112,8 @@ impl REnv {
     }
     fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            2 => match (&xs[0], &xs[1]) {
-                (RVec(ps), RVec(bs)) => {
+            2 => match &xs[0] {
+                RVec(ps) => {
                     if REnv::are_symbols(&ps[..]) {
                         RLfn(Arc::new(RLambda {
                             params: Arc::new(xs[0].clone()),
@@ -120,9 +123,9 @@ impl REnv {
                         RErr("parameters must be symbols")
                     }
                 },
-                _=> RErr("parameters and body must be in list form"),
+                _=> RErr("parameters must be in list form"),
             }
-            _ => RErrExpected!("(parameters) (body)")
+            _ => RErrExpected!("(parameters) body")
         }
     }
     fn are_symbols(params: &[RVal]) -> bool {
