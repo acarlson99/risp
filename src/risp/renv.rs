@@ -52,7 +52,7 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match &x {
             _RSym(s) => match &s[..] {
-                "def" => self.builtin_def(&xs[..]),
+                "let" => self.builtin_def(&xs[..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
                 _ => RNil,
