@@ -35,6 +35,20 @@ impl REnv<'_> {
         self.symbols.insert(key.into(), val.clone());
         val
     }
+    pub fn get<S>(&self, key: S) -> Option<RVal>
+    where
+        S: Copy + Into<String>
+    {
+        match self.symbols.get(&key.into()[..]) {
+            Some(v) => Some(v.clone()),
+            None => {
+                match &self.parent {
+                    Some(parent) => parent.get(&key.into()[..]),
+                    None => None,
+                }
+            },
+        }
+    }
 }
 
 /******************************************************************************
