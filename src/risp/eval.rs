@@ -45,26 +45,23 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
             let is_builtin = env.try_builtin(x, xs);
             match is_builtin {
                 RNil => match env.is_function(&x) {
-                    RBfn(f) => {
-                        f(xs, env)
-                    },
-                    RLfn(lambda) => {
-                        let new_env = &mut env.lambda_env(lambda.params, &xs);
-                        match &new_env {
-                            Ok(v) => {
-                              RErr("TODO: LAMBDA")  
-                            },
-                            Err(e) => e.clone(),
-                        }
-                        //RErr("TODO: lambda 2")
-                        //eval(&lambda.body, &lenv)
+                    RBfn(f) => f(xs, env),
+                    _ => match &x {
+                        RLfn(lambda) => {
+                            let new_env = &mut env.lambda_env(&lambda.params, &xs);
+                            match &new_env {
+                                Ok(v) => eval(&lambda.body, &mut v.clone()),
+                                Err(e) => e.clone(),
+                            }
+                        },
+                        _ => RErrExpected!("Fn", x.variant()),
+
                     }
-                    _ => RErrExpected!("Fn", x.variant()),
                 },
                 _ => is_builtin,
             }
         }
-//        RLfn(_) => RErrUnexpected!("Fn"),  // TODO: is this needed?
+        RLfn(_) => RErrUnexpected!("Fn"),  // TODO: is this needed?
         _ => val.clone(),
     }
 }

@@ -13,12 +13,12 @@ use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambd
 ******************************************************************************/
 
 #[derive(Clone)]
-pub struct REnv<'a> {
+pub struct REnv {
     pub symbols: FnvHashMap<String, RVal>,
-    pub parent: Option<&'a REnv<'a>>,
+    pub parent: Option<Arc<REnv>>,
 }
 
-impl REnv<'_> {
+impl REnv {
     pub fn new() -> Self {
         let mut env = REnv {
             symbols: FnvHashMap::default(),
@@ -55,13 +55,13 @@ impl REnv<'_> {
 ** @builtins
 ******************************************************************************/
 
-impl REnv<'_> {
+impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match x {
             _RSym(s) => match &s[..] {
                 "def" => self.builtin_def(&xs[0], &xs[1..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),
-                "fn" => self.builtin_lfn(&xs),
+                "defn" => self.builtin_lfn(&xs[0], &xs[1..]),
                 _ => RNil,
             },
             _ => RErrExpected!("Sym", x.clone().variant()),
@@ -119,7 +119,7 @@ impl REnv<'_> {
             ),
         }
     }
-    fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
+    fn builtin_lfn(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         let params = xs.first()
             .ok_or_else(|| RErr("function parameters"));
         let body = xs.get(1)
@@ -130,10 +130,10 @@ impl REnv<'_> {
         }
         match (params, body) {
             (Ok(p), Ok(b)) => match (&p, &b) {
-                (RVec(_), RVec(_)) => RLfn(Arc::new(RLambda {
+                (RVec(_), RVec(_)) => self.builtin_def(x, &[RLfn(Arc::new(RLambda {
                         params: Arc::new(p.clone()),
                         body: Arc::new(b.clone()),
-                    })),
+                    }))]),
                 _ => RErr("invalid fn construct"),
             }
             _ => RErr("invalid fn construct"),
@@ -157,20 +157,43 @@ impl REnv<'_> {
 
 }
 
-impl<'a> REnv<'a> {
-    pub fn lambda_env(&self, params: Arc<RVal>, args: &[RVal]) -> Result<REnv<'a>, RVal> {
-        let ks = parse_syms(params)?;
+impl REnv {
+    pub fn lambda_env(&mut self, params: &Arc<RVal>, args: &[RVal]) -> Result<REnv, RVal> {
+        let ks = parse_syms(params.clone())?;
         if ks.len() != args.len() {
             return Err(RErrExpected!(format!("{} arguments", ks.len()), args.len()));
         }
-        let vs = self.eval_syms(params)?;
+        let vs = self.eval_syms(args);
+
         let mut symbols = FnvHashMap::default();
         for (k, v) in ks.iter().zip(vs.iter()) {
             symbols.insert(k.clone(), v.clone());
         }
         Ok( REnv {
             symbols: symbols,
-            parent: Some(self),
+            parent: Some(Arc::new(self.clone())),
         })
+
+    }
+    fn eval_syms(&mut self, args: &[RVal]) -> Vec<RVal> {
+        args
+            .iter()
+            .map(|x| eval(x, self))
+            .collect()
+    }
+}
+
+fn parse_syms(params: Arc<RVal>) -> Result<Vec<String>, RVal> {
+    match &*params {
+        RVec(vs) => {
+            vs
+                .iter()
+                .map(|x| {
+                    match x {
+                        _RSym(s) => Ok(s.to_string()),
+                        _ => Err(RErr("TODO")),
+                    }}).collect()
+        },
+        _ => Err(RErr("expected parameters to be in a list")),
     }
 }
