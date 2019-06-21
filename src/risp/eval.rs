@@ -54,6 +54,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 _ => is_builtin,
             }
         }
+        RLfn(_) => RErrUnexpected!("Fn"),  // TODO: is this needed?
         _ => val.clone(),
     }
 }

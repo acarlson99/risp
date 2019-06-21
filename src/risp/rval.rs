@@ -22,6 +22,13 @@ pub enum RVal {
     RInt(i64),
     RVec(Arc<Vec<RVal>>),
     RBfn(fn(&[RVal], &mut REnv) -> RVal),
+    RLfn(Arc<RLambda>),
+}
+
+#[derive(Clone)]
+pub struct RLambda {
+    pub params: Arc<RVal>,
+    pub body: Arc<RVal>,
 }
 
 /******************************************************************************
@@ -94,6 +101,7 @@ impl fmt::Display for RVal {
                 format!("({})", xs.join(" "))
             }
             RBfn(_) => "Builtin-Fn".to_string(),
+            RLfn(l) => format!("(Fn {} {})", l.params, l.body),
         };
         write!(f, "{}", s)
     }
@@ -115,6 +123,7 @@ impl RVal {
                 format!("({})", xs.join(" "))
             }
             RBfn(_) => "Builtin-Fn".to_string(),
+            RLfn(_) => "Fn".to_string(),
         }
     }
 }

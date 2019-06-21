@@ -6,20 +6,23 @@ use fnv::FnvHashMap;
 
 use std::sync::Arc;
 
-use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*};
+use crate::risp::{eval, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
 
 /******************************************************************************
 ** @environment
 ******************************************************************************/
 
-pub struct REnv {
+#[derive(Clone)]
+pub struct REnv<'a> {
     pub symbols: FnvHashMap<String, RVal>,
+    pub parent: Option<&'a REnv<'a>>,
 }
 
-impl REnv {
+impl REnv<'_> {
     pub fn new() -> Self {
         let mut env = REnv {
             symbols: FnvHashMap::default(),
+            parent: None,
         };
         load_arithmetic(&mut env);
         load_logic(&mut env);
@@ -38,12 +41,13 @@ impl REnv {
 ** @builtins
 ******************************************************************************/
 
-impl REnv {
+impl REnv<'_> {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match x {
             _RSym(s) => match &s[..] {
                 "def" => self.builtin_def(&xs[0], &xs[1..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),
+                "fn" => self.builtin_lfn(&xs),
                 _ => RNil,
             },
             _ => RErrExpected!("Sym", x.clone().variant()),
@@ -60,7 +64,7 @@ impl REnv {
                     format!(
                         "{} {}",
                         x.clone().variant(),
-                        RVec(Arc::new(xs.to_vec())).variant()
+                        RVec(Arc::new(xs.to_vec())).variant()  // TODO: here and below
                     )
                 ),
             },
@@ -101,6 +105,28 @@ impl REnv {
             ),
         }
     }
+    fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
+        let params = xs.first()
+            .ok_or_else(|| RErr("function parameters"));
+        let body = xs.get(1)
+            .ok_or_else(|| RErr("function body"));
+        if xs.len() > 2 {
+            return RErr(
+            "fn construct only takes a list of parameters and a function body"); 
+        }
+        match (params, body) {
+            (Ok(p), Ok(b)) => match (&p, &b) {
+                (RVec(_), RVec(_)) => RLfn(Arc::new(RLambda {
+                        params: Arc::new(p.clone()),
+                        body: Arc::new(b.clone()),
+                    })),
+                _ => RErr("invalid fn construct"),
+            }
+            _ => RErr("invalid fn construct"),
+        }
+
+    }
+
 
     pub fn is_function(&self, x: &RVal) -> RVal {
         match &x {
