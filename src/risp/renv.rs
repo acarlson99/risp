@@ -154,4 +154,23 @@ impl REnv<'_> {
             _ => RNil,
         }
     }
+
+}
+
+impl<'a> REnv<'a> {
+    pub fn lambda_env(&self, params: Arc<RVal>, args: &[RVal]) -> Result<REnv<'a>, RVal> {
+        let ks = parse_syms(params)?;
+        if ks.len() != args.len() {
+            return Err(RErrExpected!(format!("{} arguments", ks.len()), args.len()));
+        }
+        let vs = self.eval_syms(params)?;
+        let mut symbols = FnvHashMap::default();
+        for (k, v) in ks.iter().zip(vs.iter()) {
+            symbols.insert(k.clone(), v.clone());
+        }
+        Ok( REnv {
+            symbols: symbols,
+            parent: Some(self),
+        })
+    }
 }

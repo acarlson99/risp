@@ -47,13 +47,24 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 RNil => match env.is_function(&x) {
                     RBfn(f) => {
                         f(xs, env)
+                    },
+                    RLfn(lambda) => {
+                        let new_env = &mut env.lambda_env(lambda.params, &xs);
+                        match &new_env {
+                            Ok(v) => {
+                              RErr("TODO: LAMBDA")  
+                            },
+                            Err(e) => e.clone(),
+                        }
+                        //RErr("TODO: lambda 2")
+                        //eval(&lambda.body, &lenv)
                     }
                     _ => RErrExpected!("Fn", x.variant()),
                 },
                 _ => is_builtin,
             }
         }
-        RLfn(_) => RErrUnexpected!("Fn"),  // TODO: is this needed?
+//        RLfn(_) => RErrUnexpected!("Fn"),  // TODO: is this needed?
         _ => val.clone(),
     }
 }
