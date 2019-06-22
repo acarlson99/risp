@@ -8,7 +8,8 @@ use std::fs;
 use std::sync::Arc;
 
 use crate::risp::{
-    eval, eval_lambda, load_arithmetic, load_io, load_logic, rep, RErr, RLambda, RVal, RVal::*,
+    eval, eval_lambda, load_arithmetic, load_io, load_logic, rep, RErr, RLambda, RSym, RVal,
+    RVal::*,
 };
 
 /******************************************************************************
@@ -250,7 +251,7 @@ impl REnv {
         if let Ok(src) = fs::read_to_string(&new_path) {
             rep(src, self)
         } else {
-            RErr(format!("could not load {}", &new_path))
+            RSym(format!("could not load {}", &new_path))
         }
     }
 }

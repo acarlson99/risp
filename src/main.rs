@@ -50,7 +50,8 @@ fn main() {
 }
 
 fn help(_: &[RVal], _: &mut REnv) -> RVal {
-    println!(r#"################################################################################
+    println!(
+        r#"################################################################################
 
 # data types:
   # Str: "Hello, World!"
@@ -67,8 +68,6 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
   # arithmetic: / * - +
   # io: read write
   # logic: = != < <= > >=
-
-# constructs:
   # at: get the nth element of a Vec
   # car: get the first element of a Lst
   # cdr: get the second element of a Lst
@@ -79,8 +78,9 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
   # quote: return a value without evaluating it first
   # eval: evaluate a string or a list
   # get: get an element from a Map using a key
+  # load: load a module
 
-################################################################################"#);
+################################################################################"#
+    );
     RLstArgs![vec![]]
 }
-
