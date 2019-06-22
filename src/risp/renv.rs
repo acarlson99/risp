@@ -53,9 +53,12 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match &x {
             _RSym(s) => match &s[..] {
+                "at" => self.builtin_at(&xs[..]),
+                "car" => self.builtin_car(&xs[..]),
+                "cdr" => self.builtin_cdr(&xs[..]),
                 "do" => self.builtin_do(&xs[..]),
                 "let" => self.builtin_def(&xs[..]),
-                "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
+                "if" => self.builtin_if(&xs[..]),
                 "fn" => self.builtin_lfn(&xs[..]),
                 "load" => self.builtin_load(&xs[..]),
                 "mod" => self.builtin_mod(&xs[..]),
@@ -74,6 +77,39 @@ impl REnv {
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
     }
+    fn builtin_at(&self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            2 => match (&xs[0], &xs[1]) {
+                (RInt(i), RVec(vs)) => if (*i as usize) >= vs.len() {
+                    RErr("index out of bounds")
+                } else {
+                    vs[*i as usize].clone()
+                },
+                _ => RErrExpected!("Int (Any)", RVecArgs![xs].variant()),
+            },
+            _ => RErrExpected!("Int (Any)", RVecArgs![xs].variant()),
+        }
+    }
+    fn builtin_car(&self, xs: &[RVal]) -> RVal {
+        match &xs[0] {
+            RVec(vs) => if vs.is_empty() {
+                RVecArgs!(vec![])
+            } else {
+                vs[0].clone()
+            }
+            _ => RErrExpected!("(Any)", RVecArgs![xs].variant()),
+        }
+    }
+    fn builtin_cdr(&self, xs: &[RVal]) -> RVal {
+        match &xs[0] {
+            RVec(vs) => if vs.len() < 3 {
+                RVecArgs!(vec![])
+            } else {
+                vs[1].clone()
+            }
+            _ => RErrExpected!("(Any)", RVecArgs![xs].variant()),
+        }
+    }
     fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
         let mut val = RNil;
         for v in xs[..].iter() {
@@ -89,37 +125,22 @@ impl REnv {
                     let new_val = eval(&xs[1], self);
                     self.def(&s[..], new_val)
                 },
-                _ => RErrExpected!("(Sym Any)", RVecArgs!(xs).variant()),
+                _ => RErrExpected!("(Sym Any)", RVecArgs![xs].variant()),
             },
-            _ => RErrExpected!("(Sym Any)", RVecArgs!(xs).variant()),
+            _ => RErrExpected!("(Sym Any)", RVecArgs![xs].variant()),
         }
     }
-    // TODO: fix possible segfault here
-    fn builtin_if(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
+    fn builtin_if(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            0 => RErrExpected!("(Bool Any Any)", x.variant()),
-            2 => match eval(&x, self) {
+            0 => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
+            3 => match eval(&xs[0], self) {
                 RBool(b) => {
                     let idx = if b { 0 } else { 1 };
-                    eval(&xs[idx], self)
+                    eval(&xs[idx+1], self)
                 }
-                _ => RErrExpected!(
-                    "(Bool Any Any)",
-                    format!(
-                        "{} {}",
-                        x.clone().variant(),
-                        RVec(Arc::new(xs.to_vec())).variant()
-                    )
-                ),
+                _ => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
             },
-            _ => RErrExpected!(
-                "(Bool Any Any)",
-                format!(
-                    "{} {}",
-                    x.clone().variant(),
-                    RVec(Arc::new(xs.to_vec())).variant()
-                )
-            ),
+            _ => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
         }
     }
     fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
