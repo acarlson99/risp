@@ -18,3 +18,6 @@ pub use self::logic::*;
 #[macro_use]
 mod arithmetic;
 pub use self::arithmetic::*;
+
+mod io;
+pub use self::io::*;

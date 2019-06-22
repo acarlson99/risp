@@ -7,7 +7,7 @@ use fnv::FnvHashMap;
 use std::fs;
 use std::sync::Arc;
 
-use crate::risp::{eval, rep, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
+use crate::risp::{eval, rep, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda, load_io};
 
 /******************************************************************************
 ** @environment
@@ -25,6 +25,7 @@ impl REnv {
         };
         load_arithmetic(&mut env);
         load_logic(&mut env);
+        load_io(&mut env);
         env
     }
     pub fn def<S>(&mut self, key: S, val: RVal) -> RVal
@@ -183,6 +184,8 @@ impl REnv {
         }
     }
 
+    // TODO: fix. this works but always returns an error in the end.
+    // I believe it is returning something that the repl does not like.
     fn builtin_load(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             1 => match &xs[0] {
