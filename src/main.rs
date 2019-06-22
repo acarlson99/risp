@@ -13,7 +13,6 @@ use risp::{rep, REnv, RVal, RVal::*};
 const REPL0: &str = include_str!("../.repl_logo");
 const REPL1: &str = "# ";
 
-// TODO: autocompletion
 fn main() {
     let mut env = REnv::new();
     let mut rl = Editor::<()>::new();
@@ -23,9 +22,8 @@ fn main() {
     env.load("stdlib/prelude.rs");
     if let Some(path) = env::args().nth(1) {
         env.load(path);
-        return ();
+        return;
     }
-    // TODO: fix module support
     println!("{}", REPL0);
     env.def("help", RBfn(help));
     loop {

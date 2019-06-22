@@ -139,7 +139,6 @@ impl REnv {
         let mut val = RNil;
         for v in xs[..].iter() {
             val = eval(&v, self);
-            println!("{}", &val);
         }
         val
     }
