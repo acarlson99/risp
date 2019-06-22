@@ -65,7 +65,11 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
             .split_first()
             .ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
         if next == end {
-            return Ok((RVecArgs!(vs), rest));
+            if end == ")" || end == "]" {
+                return Ok((RVecArgs!(vs), rest));
+            } else {
+                return Ok((RMapArgs!(vs), rest));
+            }
         }
         let (new_vs, new_xs) = parse(&xs)?;
         vs.push(new_vs);

@@ -3,12 +3,29 @@
 ******************************************************************************/
 
 use std::cmp::Ordering;
+use std::hash::{Hash, Hasher};
 
 use crate::risp::{eval, REnv, RErr, RVal, RVal::*};
 
 /******************************************************************************
 ** @logical operators
 ******************************************************************************/
+
+// TODO: maps of maps
+impl Hash for RVal {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            _RErr(s) => s.hash(state),
+            _RStr(s) => s.hash(state),
+            _RSym(s) => s.hash(state),
+            RBool(b) => b.hash(state),
+            RInt(i) => i.hash(state),
+            _ => 0.hash(state),  // Should not be reachable
+        };
+    }
+}
+
+impl Eq for RVal {}
 
 impl PartialEq for RVal {
     fn eq(&self, other: &Self) -> bool {
