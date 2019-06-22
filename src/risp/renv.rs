@@ -61,7 +61,6 @@ impl REnv {
                 "let" => self.builtin_def(&xs[..]),
                 "if" => self.builtin_if(&xs[..]),
                 "fn" => self.builtin_lfn(&xs[..]),
-                "load" => self.builtin_load(&xs[..]),
                 "mod" => self.builtin_mod(&xs[..]),
                 "quote" => self.builtin_quote(&xs[..]),
                 "eval" => self.builtin_eval(xs),
@@ -183,18 +182,6 @@ impl REnv {
                 }
             }
             _ => RNil,
-        }
-    }
-
-    // TODO: fix. this works but always returns an error in the end.
-    // I believe it is returning something that the repl does not like.
-    fn builtin_load(&mut self, xs: &[RVal]) -> RVal {
-        match xs.len() {
-            1 => match &xs[0] {
-                _RStr(path) => self.load(&path[..]),
-                _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
-            },
-            _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
         }
     }
     fn builtin_mod(&mut self, xs: &[RVal]) -> RVal {

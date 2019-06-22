@@ -6,6 +6,8 @@ use crate::risp::{REnv, eval, RErr, RVal, RStr, RVal::*};
 pub fn load_io(env: &mut REnv) {
     env.def("read", RBfn(read));
     env.def("write", RBfn(print));
+    env.def("load", RBfn(load));
+
 }
 
 fn read(args: &[RVal], _env: &mut REnv) -> RVal {
@@ -45,4 +47,15 @@ fn print(args: &[RVal], env: &mut REnv) -> RVal {
     }
     println!("");
     RVecArgs![vec![]]
+}
+
+// TODO: fix. this works but always returns error in the end.
+fn load(args: &[RVal], env: &mut REnv) -> RVal {
+   match args.len() {
+       1 => match &args[0] {
+           _RStr(path) => env.load(&path[..]),
+           _ => RErrExpected!("(Str)", RVecArgs![args].variant()),
+       },
+       _ => RErrExpected!("(Str)", RVecArgs![args].variant()),
+   }
 }

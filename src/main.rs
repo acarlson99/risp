@@ -8,7 +8,7 @@ use rustyline::Editor;
 
 #[macro_use]
 mod risp;
-use risp::{rep, REnv};
+use risp::{rep, REnv, RErr, RVal, RVal::*};
 
 const REPL0: &str = include_str!("../.repl_logo");
 const REPL1: &str = "# ";
@@ -25,6 +25,8 @@ fn main() {
     if let Some(path) = env::args().nth(1) {
         env.load(path);
     }
+    // TODO: fix module support
+    env.def("load", RBfn(fake_load));
     loop {
         let readline = rl.readline(REPL1);
         match readline {
@@ -44,4 +46,8 @@ fn main() {
             }
         }
     }
+}
+
+fn fake_load(_: &[RVal], _: &mut REnv) -> RVal {
+    RErr("loading modules from the REPL is not currently supported")
 }
