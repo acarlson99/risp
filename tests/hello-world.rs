@@ -1,3 +1,5 @@
 (let main
   (fn ()
-   (max 1 2)))
+    (do
+      (max 1 2))))
+

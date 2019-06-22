@@ -53,6 +53,7 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match &x {
             _RSym(s) => match &s[..] {
+                "do" => self.builtin_do(&xs[..]),
                 "let" => self.builtin_def(&xs[..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
@@ -72,6 +73,12 @@ impl REnv {
             }
             _ => RErrExpected!("Sym", x.clone().variant()),
         }
+    }
+    fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
+        for v in xs[..].iter() {
+            println!("{}", eval(&v, self));
+        }
+        RNil
     }
     pub fn builtin_def(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
