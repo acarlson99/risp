@@ -44,17 +44,16 @@ fn write(args: &[RVal], env: &mut REnv) -> RVal {
             _ => print!("{}", v),
         }
     }
-    println!();
     RLstArgs![vec![]]
 }
 
-// TODO: fix. this works but always returns error in the end.
 fn load(args: &[RVal], env: &mut REnv) -> RVal {
     match args.len() {
         1 => match &args[0] {
             _RStr(path) => env.load(&path[..]),
-            _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
+            _ => return RErrExpected!("(Str)", RLstArgs![args].variant()),
         },
-        _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
-    }
+        _ => return RErrExpected!("(Str)", RLstArgs![args].variant()),
+    };
+    RLstArgs![vec![]]
 }
