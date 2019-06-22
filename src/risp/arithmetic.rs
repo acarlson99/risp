@@ -107,7 +107,7 @@ macro_rules! rval_binop {
 
 macro_rules! rval_varop {
     ($op: ident, $env: ident, $args: ident, $arg0: expr, $arg1: expr) => {
-        rval_binop!{$op, $env};
+        rval_binop! {$op, $env};
         if $args.len() > 1 {
             let res = $arg0.iter().fold($arg1, |acc, x| binop(acc, x, $env));
             match &res {
@@ -120,7 +120,7 @@ macro_rules! rval_varop {
                 _ => None,
             }).next();
             */
-            RErrExpected!("(Num Num ...)", RVecArgs!($args).variant())
+            RErrExpected!("(Num Num ...)", RLstArgs!($args).variant())
         }
     };
 }
@@ -128,12 +128,12 @@ macro_rules! rval_varop {
 macro_rules! rval_arithmetic {
     ($op: ident, $idx: expr, $acc: expr) => {
         fn $op(args: &[RVal], env: &mut REnv) -> RVal {
-            rval_varop!{$op, env, args, args[$idx..], $acc}
+            rval_varop! {$op, env, args, args[$idx..], $acc}
         }
     };
     ($op: ident, $idx: expr) => {
         fn $op(args: &[RVal], env: &mut REnv) -> RVal {
-            rval_varop!{$op, env, args, args[$idx..], args[0].clone()}
+            rval_varop! {$op, env, args, args[$idx..], args[0].clone()}
         }
     };
 }

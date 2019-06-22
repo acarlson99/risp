@@ -22,6 +22,7 @@ pub enum RVal {
     RBool(bool),
     RFlt(f64),
     RInt(i64),
+    RLst(Arc<Vec<RVal>>),
     RVec(Arc<Vec<RVal>>),
     RMap(Arc<FnvHashMap<RVal, RVal>>),
     RBfn(fn(&[RVal], &mut REnv) -> RVal),
@@ -70,7 +71,6 @@ macro_rules! RErrExpected {
     ($expected: expr) => {
         RErr(format!("expected {}", $expected))
     };
-
 }
 
 #[allow(non_snake_case)]
@@ -104,11 +104,11 @@ macro_rules! RMapArgs {
                             hashable = false;
                             var = x.variant();
                             break;
-                        },
+                        }
                     };
                     ks.push(x.clone());
                 }
-                i = i + 1;
+                i += 1;
             }
             if hashable {
                 for (k, v) in ks.iter().zip(vs.iter()) {
@@ -124,6 +124,12 @@ macro_rules! RMapArgs {
     };
 }
 
+#[allow(non_snake_case)]
+macro_rules! RLstArgs {
+    ($args: expr) => {
+        RLst(std::sync::Arc::new($args.to_vec()))
+    };
+}
 
 #[allow(non_snake_case)]
 macro_rules! RVecArgs {
@@ -141,6 +147,7 @@ impl RVal {
         use RVal::*;
         match self {
             RVec(vs) => vs.len(),
+            RLst(vs) => vs.len(),
             _ => 1,
         }
     }
@@ -161,13 +168,17 @@ impl fmt::Display for RVal {
             RBool(b) => b.to_string(),
             RFlt(f) => f.to_string(),
             RInt(i) => i.to_string(),
+            RLst(vs) => {
+                let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
+                format!("({})", xs.join(" "))
+            },
             RMap(vs) => {
-                let xs: Vec<String> = vs.iter().map(|(x,y)| format!("{} {}", x,y)).collect();
+                let xs: Vec<String> = vs.iter().map(|(x, y)| format!("{} {}", x, y)).collect();
                 format!("{{{}}}", xs.join(" "))
             },
             RVec(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
-                format!("({})", xs.join(" "))
+                format!("[{}]", xs.join(" "))
             },
             RBfn(_) => "Builtin-Fn".to_string(),
             RLfn(l) => format!("(Fn {} {})", l.params, l.body),
@@ -187,14 +198,21 @@ impl RVal {
             RBool(_) => "Bool".to_string(),
             RFlt(_) => "Flt".to_string(),
             RInt(_) => "Int".to_string(),
-            RMap(vs) => {
-                let xs: Vec<String> = vs.iter().map(|(x,y)| format!("{} {}", x.variant(),y.variant())).collect();
-                format!("{{{}}}", xs.join(" "))
-           },
-            RVec(vs) => {
+            RLst(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.variant()).collect();
                 format!("({})", xs.join(" "))
-            },
+            }
+            RMap(vs) => {
+                let xs: Vec<String> = vs
+                    .iter()
+                    .map(|(x, y)| format!("{} {}", x.variant(), y.variant()))
+                    .collect();
+                format!("{{{}}}", xs.join(" "))
+            }
+            RVec(vs) => {
+                let xs: Vec<String> = vs.iter().map(|x| x.variant()).collect();
+                format!("[{}]", xs.join(" "))
+            }
             RBfn(_) => "Builtin-Fn".to_string(),
             RLfn(_) => "Fn".to_string(),
         }

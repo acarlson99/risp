@@ -7,7 +7,9 @@ use fnv::FnvHashMap;
 use std::fs;
 use std::sync::Arc;
 
-use crate::risp::{eval, rep, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda, load_io};
+use crate::risp::{
+    eval, eval_lambda, load_arithmetic, load_io, load_logic, rep, RErr, RLambda, RVal, RVal::*,
+};
 
 /******************************************************************************
 ** @environment
@@ -37,7 +39,7 @@ impl REnv {
     }
     pub fn get<S>(&self, key: S) -> Option<RVal>
     where
-        S: Copy + Into<String>
+        S: Copy + Into<String>,
     {
         match self.symbols.get(&key.into()[..]) {
             Some(v) => Some(v.clone()),
@@ -66,12 +68,13 @@ impl REnv {
                 "eval" => self.builtin_eval(xs),
                 _ => RNil,
             },
-            RVec(vs) => {
+            RLst(vs) => {
                 if vs.is_empty() {
-                    return RErrExpected!("Sym", x.clone().variant())
+                    return RErrExpected!("Sym", x.clone().variant());
                 }
                 let new_val = eval(&x, self);
                 match &new_val {
+                    RBfn(f) => f(xs, self),
                     RLfn(lambda) => eval_lambda(lambda, &xs[..], self),
                     _ => RErrExpected!("Sym", x.clone().variant()),
                 }
@@ -82,34 +85,40 @@ impl REnv {
     fn builtin_at(&self, xs: &[RVal]) -> RVal {
         match xs.len() {
             2 => match (&xs[0], &xs[1]) {
-                (RInt(i), RVec(vs)) => if (*i as usize) >= vs.len() {
-                    RErr("index out of bounds")
-                } else {
-                    vs[*i as usize].clone()
-                },
-                _ => RErrExpected!("Int (Any)", RVecArgs![xs].variant()),
+                (RInt(i), RVec(vs)) => {
+                    if (*i as usize) >= vs.len() {
+                        RErr("index out of bounds")
+                    } else {
+                        vs[*i as usize].clone()
+                    }
+                }
+                _ => RErrExpected!("Int (Vec)", RLstArgs![xs].variant()),
             },
-            _ => RErrExpected!("Int (Any)", RVecArgs![xs].variant()),
+            _ => RErrExpected!("Int (Vec)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_car(&self, xs: &[RVal]) -> RVal {
         match &xs[0] {
-            RVec(vs) => if vs.is_empty() {
-                RVecArgs!(vec![])
-            } else {
-                vs[0].clone()
+            RLst(vs) => {
+                if vs.is_empty() {
+                    RLstArgs!(vec![])
+                } else {
+                    vs[0].clone()
+                }
             }
-            _ => RErrExpected!("(Any)", RVecArgs![xs].variant()),
+            _ => RErrExpected!("(Lst)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_cdr(&self, xs: &[RVal]) -> RVal {
         match &xs[0] {
-            RVec(vs) => if vs.len() < 3 {
-                RVecArgs!(vec![])
-            } else {
-                vs[1].clone()
+            RLst(vs) => {
+                if vs.len() < 3 {
+                    RLstArgs!(vec![])
+                } else {
+                    vs[1].clone()
+                }
             }
-            _ => RErrExpected!("(Any)", RVecArgs![xs].variant()),
+            _ => RErrExpected!("(Lst)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
@@ -126,29 +135,29 @@ impl REnv {
                 _RSym(s) => {
                     let new_val = eval(&xs[1], self);
                     self.def(&s[..], new_val)
-                },
-                _ => RErrExpected!("(Sym Any)", RVecArgs![xs].variant()),
+                }
+                _ => RErrExpected!("(Sym Any)", RLstArgs![xs].variant()),
             },
-            _ => RErrExpected!("(Sym Any)", RVecArgs![xs].variant()),
+            _ => RErrExpected!("(Sym Any)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_if(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            0 => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
+            0 => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
             3 => match eval(&xs[0], self) {
                 RBool(b) => {
                     let idx = if b { 0 } else { 1 };
-                    eval(&xs[idx+1], self)
+                    eval(&xs[idx + 1], self)
                 }
-                _ => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
+                _ => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
             },
-            _ => RErrExpected!("(Bool Any Any)", RVecArgs![xs].variant()),
+            _ => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             2 => match &xs[0] {
-                RVec(ps) => {
+                RLst(ps) => {
                     if REnv::are_symbols(&ps[..]) {
                         RLfn(Arc::new(RLambda {
                             params: Arc::new(xs[0].clone()),
@@ -157,10 +166,10 @@ impl REnv {
                     } else {
                         RErr("parameters must be symbols")
                     }
-                },
-                _=> RErr("parameters must be in list form"),
-            }
-            _ => RErrExpected!("(parameters) body")
+                }
+                _ => RErr("parameters must be in list form"),
+            },
+            _ => RErrExpected!("(parameters) body"),
         }
     }
     fn are_symbols(params: &[RVal]) -> bool {
@@ -170,7 +179,7 @@ impl REnv {
                 _ => return false,
             }
         }
-        return true;
+        true
     }
     pub fn is_function(&self, x: &RVal) -> RVal {
         match &x {
@@ -197,19 +206,20 @@ impl REnv {
     fn builtin_quote(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             1 => xs[0].clone(),
-            _ => RErrExpected!("(Any)", RVecArgs!(xs).variant()),
+            _ => RErrExpected!("(Any)", RLstArgs!(xs).variant()),
         }
     }
     fn builtin_eval(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
             1 => match &xs[0] {
-                _RSym(_) => {
-                    let new_val = eval(&xs[0], self).to_string();
-                    rep(&new_val[..], self)
+                _RStr(s) => rep(&s[..], self),
+                RLst(_) => {
+                    let _x0 = rep(&xs[0].to_string(), self);
+                    eval(&_x0, self)
                 }
                 _ => eval(&xs[0], self),
-            },
-            _ => RErrExpected!("(Any)", RVecArgs!(xs).variant()),
+            }
+            _ => RErrExpected!("(Any)", RLstArgs!(xs).variant()),
         }
     }
 }
@@ -220,14 +230,14 @@ impl REnv {
 
 impl REnv {
     pub fn load<S>(&mut self, path: S) -> RVal
-        where
-        S: Into<String>
-        {
-            let new_path = path.into();
-            if let Ok(src) = fs::read_to_string(&new_path) {
-                rep(src, self)
-            } else {
-                RErr(format!("could not load {}", &new_path))
-            }
+    where
+        S: Into<String>,
+    {
+        let new_path = path.into();
+        if let Ok(src) = fs::read_to_string(&new_path) {
+            rep(src, self)
+        } else {
+            RErr(format!("could not load {}", &new_path))
         }
+    }
 }

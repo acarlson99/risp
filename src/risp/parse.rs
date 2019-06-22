@@ -65,10 +65,14 @@ fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String])
             .split_first()
             .ok_or_else(|| RErrExpected!(format!("'{}'", end), "EOF"))?;
         if next == end {
-            if end == ")" || end == "]" {
+            if end == ")" {
+                return Ok((RLstArgs!(vs), rest));
+            } else if end == "]" {
                 return Ok((RVecArgs!(vs), rest));
-            } else {
+            } else if end == "}" {
                 return Ok((RMapArgs!(vs), rest));
+            } else {
+                return Err(RErr("internal error (read rest)"));
             }
         }
         let (new_vs, new_xs) = parse(&xs)?;

@@ -2,7 +2,7 @@
 ** @crates and modules
 ******************************************************************************/
 
-use crate::risp::{parse, tokenize, REnv, RErr, RVal, RVal::*, RLambda};
+use crate::risp::{parse, tokenize, REnv, RErr, RLambda, RVal, RVal::*};
 
 /******************************************************************************
 ** @read-eval-print
@@ -35,10 +35,10 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 Ok(v) => v,
                 Err(e) => e,
             }
-        },
-        RVec(vs) => {
+        }
+        RLst(vs) => {
             if vs.is_empty() {
-                return RVecArgs!(vec![]);
+                return RLstArgs!(vec![]);
             }
             let x = &vs[0];
             let xs = &vs[1..];
@@ -48,7 +48,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                     RBfn(f) => f(xs, env),
                     RLfn(lambda) => eval_lambda(&lambda, xs, env),
                     _ => RErrExpected!("Fn", x.variant()),
-                },
+                }
                 _ => is_builtin,
             }
         }
@@ -59,7 +59,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
 pub fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
     if args.len() == lambda.params.len() {
         match &*lambda.params {
-            RVec(vs) => {
+            RLst(vs) => {
                 let mut new_env = env.clone();
                 for (k, v) in vs.iter().zip(args.iter()) {
                     let new_val = eval(&v.clone(), &mut new_env);
@@ -69,12 +69,13 @@ pub fn eval_lambda(lambda: &RLambda, args: &[RVal], env: &REnv) -> RVal {
                     };
                 }
                 eval(&lambda.body, &mut new_env)
-            },
+            }
             _ => RErr("internal error (eval_lambda)"),
         }
     } else {
         RErrExpected!(
             format!("{} arguments", lambda.params.len()),
-            format!("{}", args.len()))
+            format!("{}", args.len())
+        )
     }
 }

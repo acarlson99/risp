@@ -20,7 +20,7 @@ impl Hash for RVal {
             _RSym(s) => s.hash(state),
             RBool(b) => b.hash(state),
             RInt(i) => i.hash(state),
-            _ => 0.hash(state),  // Should not be reachable
+            _ => 0.hash(state), // Should not be reachable
         };
     }
 }
@@ -41,6 +41,8 @@ impl PartialEq for RVal {
             (RInt(a), RFlt(b)) => (*a as f64).eq(b),
             (RInt(a), RInt(b)) => a.eq(b),
             (RVec(a), RVec(b)) => a.eq(b),
+            (RLst(a), RLst(b)) => a.eq(b),
+            (RMap(a), RMap(b)) => a.eq(b),
             _ => false,
         }
     }
@@ -56,6 +58,7 @@ impl PartialOrd for RVal {
             (RInt(a), RFlt(b)) => (*a as f64).partial_cmp(b),
             (RInt(a), RInt(b)) => Some(a.cmp(b)),
             (RVec(a), RVec(b)) => a.partial_cmp(b),
+            (RLst(a), RLst(b)) => a.partial_cmp(b),
             _ => None,
         }
     }
@@ -94,7 +97,7 @@ macro_rules! rval_logic {
                     _ => res.clone(),
                 }
             } else {
-                RErrExpected!("(A A ...)", RVecArgs!(args).variant())
+                RErrExpected!("(A A ...)", RLstArgs!(args).variant())
             }
         }
     };
