@@ -38,10 +38,10 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
         }
         RVec(vs) => {
             if vs.is_empty() {
-                return RNil;
+                return RVecArgs!(vec![]);
             }
             let x = &vs[0];
-            let xs = &vs[1..];  // TODO: fix, this could segv
+            let xs = &vs[1..];
             let is_builtin = env.try_builtin(x, xs);
             match is_builtin {
                 RNil => match env.is_function(&x) {

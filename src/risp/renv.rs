@@ -75,10 +75,12 @@ impl REnv {
         }
     }
     fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
+        let mut val = RNil;
         for v in xs[..].iter() {
-            println!("{}", eval(&v, self));
+            val = eval(&v, self);
+            println!("{}", &val);
         }
-        RNil
+        val
     }
     pub fn builtin_def(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
