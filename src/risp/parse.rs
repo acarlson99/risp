@@ -56,7 +56,6 @@ pub fn parse<'a>(tokens: &'a [String]) -> Result<(RVal, &'a [String]), RVal> {
     }
 }
 
-// TODO: add support for hashmaps and sets
 fn read_rest<'a>(tokens: &'a [String], end: &str) -> Result<(RVal, &'a [String]), RVal> {
     let mut vs = vec![];
     let mut xs = tokens;

@@ -89,7 +89,7 @@ impl REnv {
                 RMap(hm) => match hm.get(&eval(&xs[0], self)) {
                     Some(v) => v.clone(),
                     None => RLstArgs!(vec![]),
-                }
+                },
                 _ => RErrExpected!("(Any Map)", RLstArgs![xs].variant()),
             },
             _ => RErrExpected!("(Any Map)", RLstArgs![xs].variant()),
@@ -231,7 +231,7 @@ impl REnv {
                     eval(&_x0, self)
                 }
                 _ => eval(&xs[0], self),
-            }
+            },
             _ => RErrExpected!("(Any)", RLstArgs!(xs).variant()),
         }
     }

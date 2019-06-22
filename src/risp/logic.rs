@@ -11,7 +11,6 @@ use crate::risp::{eval, REnv, RErr, RVal, RVal::*};
 ** @logical operators
 ******************************************************************************/
 
-// TODO: maps of maps
 impl Hash for RVal {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match self {

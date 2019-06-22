@@ -171,15 +171,15 @@ impl fmt::Display for RVal {
             RLst(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
                 format!("({})", xs.join(" "))
-            },
+            }
             RMap(vs) => {
                 let xs: Vec<String> = vs.iter().map(|(x, y)| format!("{} {}", x, y)).collect();
                 format!("{{{}}}", xs.join(" "))
-            },
+            }
             RVec(vs) => {
                 let xs: Vec<String> = vs.iter().map(|x| x.to_string()).collect();
                 format!("[{}]", xs.join(" "))
-            },
+            }
             RBfn(_) => "Builtin-Fn".to_string(),
             RLfn(l) => format!("(Fn {} {})", l.params, l.body),
         };

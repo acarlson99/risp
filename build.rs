@@ -10,7 +10,7 @@ const REPL0: &str = "
 ██╔══██╗██║╚════██║██╔═══╝
 ██║  ██║██║███████║██║ REPL
 ╚═╝  ╚═╝╚═╝╚══════╝╚═╝ ";
-const REPL1: &str = "Use Ctrl-C or Ctrl-D to exit REPL";
+const REPL1: &str = "Use Ctrl-C or Ctrl-D to exit REPL. Type (help) for help.";
 
 fn main() -> std::io::Result<()> {
     let output = Command::new("git")

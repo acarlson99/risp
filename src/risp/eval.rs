@@ -27,6 +27,9 @@ where
 pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
     match &val {
         _RSym(s) => {
+            if s.starts_with(':') {
+                return val.clone();
+            }
             let _r = env
                 .get(&s.to_string())
                 .ok_or_else(|| RErrUnboundSymbol!(s))
@@ -48,7 +51,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                     RBfn(f) => f(xs, env),
                     RLfn(lambda) => eval_lambda(&lambda, xs, env),
                     _ => RErrExpected!("Fn", x.variant()),
-                }
+                },
                 _ => is_builtin,
             }
         }
