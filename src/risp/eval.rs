@@ -35,7 +35,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 Ok(v) => v,
                 Err(e) => e,
             }
-        }
+        },
         RVec(vs) => {
             if vs.is_empty() {
                 return RVecArgs!(vec![]);

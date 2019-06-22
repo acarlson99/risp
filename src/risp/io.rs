@@ -32,9 +32,13 @@ fn print(args: &[RVal], env: &mut REnv) -> RVal {
     for v in args.iter() {
         match &v {
             _RStr(s) => print!("{}", s),
-            _RSym(_) => match &eval(&v, env) {
+            _RSym(_) => {
+                let new_v = eval(&v, env);
+                match &new_v {
+                _RErr(_) => return RErrUnboundSymbol!(v),
                 _RStr(s) => print!("{}", s),
-                _ => return RErrUnboundSymbol!(v),
+                _ => print!("{}", new_v),
+                }
             },
             _ => print!("{}", v),
         }

@@ -63,6 +63,8 @@ impl REnv {
                 "fn" => self.builtin_lfn(&xs[..]),
                 "load" => self.builtin_load(&xs[..]),
                 "mod" => self.builtin_mod(&xs[..]),
+                "quote" => self.builtin_quote(&xs[..]),
+                "eval" => self.builtin_eval(xs),
                 _ => RNil,
             },
             RVec(vs) => {
@@ -203,6 +205,24 @@ impl REnv {
             RNil
         } else {
             RErr("invalid module")
+        }
+    }
+    fn builtin_quote(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            1 => xs[0].clone(),
+            _ => RErrExpected!("(Any)", RVecArgs!(xs).variant()),
+        }
+    }
+    fn builtin_eval(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            1 => match &xs[0] {
+                _RSym(_) => {
+                    let new_val = eval(&xs[0], self).to_string();
+                    rep(&new_val[..], self)
+                }
+                _ => eval(&xs[0], self),
+            },
+            _ => RErrExpected!("(Any)", RVecArgs!(xs).variant()),
         }
     }
 }
