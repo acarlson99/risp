@@ -56,16 +56,17 @@ impl REnv {
     pub fn try_builtin(&mut self, x: &RVal, xs: &[RVal]) -> RVal {
         match &x {
             _RSym(s) => match &s[..] {
-                "at" => self.builtin_at(&xs[..]),
-                "car" => self.builtin_car(&xs[..]),
-                "cdr" => self.builtin_cdr(&xs[..]),
-                "do" => self.builtin_do(&xs[..]),
-                "let" => self.builtin_def(&xs[..]),
-                "if" => self.builtin_if(&xs[..]),
-                "fn" => self.builtin_lfn(&xs[..]),
-                "mod" => self.builtin_mod(&xs[..]),
-                "quote" => self.builtin_quote(&xs[..]),
+                "at" => self.builtin_at(xs),
+                "car" => self.builtin_car(xs),
+                "cdr" => self.builtin_cdr(xs),
+                "do" => self.builtin_do(xs),
+                "let" => self.builtin_def(xs),
+                "if" => self.builtin_if(xs),
+                "fn" => self.builtin_lfn(xs),
+                "mod" => self.builtin_mod(xs),
+                "quote" => self.builtin_quote(xs),
                 "eval" => self.builtin_eval(xs),
+                "get" => self.builtin_get(xs),
                 _ => RNil,
             },
             RLst(vs) => {
@@ -76,10 +77,22 @@ impl REnv {
                 match &new_val {
                     RBfn(f) => f(xs, self),
                     RLfn(lambda) => eval_lambda(lambda, &xs[..], self),
-                    _ => RErrExpected!("Sym", x.clone().variant()),
+                    _ => RErrExpected!("(Sym)", x.clone().variant()),
                 }
             }
-            _ => RErrExpected!("Sym", x.clone().variant()),
+            _ => RErrExpected!("(Sym)", x.clone().variant()),
+        }
+    }
+    fn builtin_get(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            2 => match &xs[1] {
+                RMap(hm) => match hm.get(&eval(&xs[0], self)) {
+                    Some(v) => v.clone(),
+                    None => RLstArgs!(vec![]),
+                }
+                _ => RErrExpected!("(Any Map)", RLstArgs![xs].variant()),
+            },
+            _ => RErrExpected!("(Any Map)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_at(&self, xs: &[RVal]) -> RVal {
