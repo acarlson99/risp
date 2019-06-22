@@ -1,3 +1,5 @@
+use std::env;
+
 #[macro_use]
 extern crate lazy_static;
 extern crate rustyline;
@@ -15,10 +17,14 @@ const REPL1: &str = "# ";
 fn main() {
     let mut env = REnv::new();
     let mut rl = Editor::<()>::new();
+    if let Some(path) = env::args().nth(1) {
+        env.load(path);
+    }
     match rl.load_history(".repl_history") {
         _ => (),
     }
     println!("{}", REPL0);
+    println!("{}", env.load("stdlib/prelude.rs"));
     loop {
         let readline = rl.readline(REPL1);
         match readline {

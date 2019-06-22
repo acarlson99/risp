@@ -4,9 +4,10 @@
 
 use fnv::FnvHashMap;
 
+use std::fs;
 use std::sync::Arc;
 
-use crate::risp::{eval, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
+use crate::risp::{eval, rep, eval_lambda, load_arithmetic, load_logic, RErr, RVal, RVal::*, RLambda};
 
 /******************************************************************************
 ** @environment
@@ -55,6 +56,7 @@ impl REnv {
                 "let" => self.builtin_def(&xs[..]),
                 "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
+                "load" => self.builtin_load(&xs[..]),
                 _ => RNil,
             },
             RVec(vs) => {
@@ -128,6 +130,15 @@ impl REnv {
             _ => RErrExpected!("(parameters) body")
         }
     }
+    fn builtin_load(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            1 => match &xs[0] {
+                _RStr(path) => self.load(&path[..]),
+                _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
+            },
+            _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
+        }
+    }
     fn are_symbols(params: &[RVal]) -> bool {
         for v in params.iter() {
             match &v {
@@ -150,5 +161,22 @@ impl REnv {
             _ => RNil,
         }
     }
+}
 
+/******************************************************************************
+** @repl io
+******************************************************************************/
+
+impl REnv {
+    pub fn load<S>(&mut self, path: S) -> RVal
+        where
+        S: Into<String>
+        {
+            let new_path = path.into();
+            if let Ok(src) = fs::read_to_string(&new_path) {
+                rep(src, self)
+            } else {
+                RErr(format!("could not load {}", &new_path))
+            }
+        }
 }
