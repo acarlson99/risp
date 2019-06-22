@@ -57,6 +57,7 @@ impl REnv {
                 "if" => self.builtin_if(&xs[0], &xs[1..]),  // TODO: fix segv
                 "fn" => self.builtin_lfn(&xs[..]),
                 "load" => self.builtin_load(&xs[..]),
+                "mod" => self.builtin_mod(&xs[..]),
                 _ => RNil,
             },
             RVec(vs) => {
@@ -130,15 +131,6 @@ impl REnv {
             _ => RErrExpected!("(parameters) body")
         }
     }
-    fn builtin_load(&mut self, xs: &[RVal]) -> RVal {
-        match xs.len() {
-            1 => match &xs[0] {
-                _RStr(path) => self.load(&path[..]),
-                _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
-            },
-            _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
-        }
-    }
     fn are_symbols(params: &[RVal]) -> bool {
         for v in params.iter() {
             match &v {
@@ -148,7 +140,6 @@ impl REnv {
         }
         return true;
     }
-
     pub fn is_function(&self, x: &RVal) -> RVal {
         match &x {
             _RSym(s) => {
@@ -159,6 +150,26 @@ impl REnv {
                 }
             }
             _ => RNil,
+        }
+    }
+
+    fn builtin_load(&mut self, xs: &[RVal]) -> RVal {
+        match xs.len() {
+            1 => match &xs[0] {
+                _RStr(path) => self.load(&path[..]),
+                _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
+            },
+            _ => RErrExpected!("(Str)", RVecArgs!(xs).variant()),
+        }
+    }
+    fn builtin_mod(&mut self, xs: &[RVal]) -> RVal {
+        if xs.len() >= 2 {
+            for v in xs[1..].iter() {
+                eval(v, self);
+            }
+            RNil
+        } else {
+            RErr("invalid module")
         }
     }
 }
