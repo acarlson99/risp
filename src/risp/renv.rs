@@ -48,6 +48,19 @@ impl REnv {
             None => None,
         }
     }
+    pub fn restore<S>(&mut self, key: S, val: Option<RVal>) where S: Into<String> {
+        let ks = key.into();
+        match val {
+            Some(val) => self.def(ks, val),
+            None => {
+                self.symbols = self.symbols.clone()
+                    .into_iter()
+                    .filter(|(k,_)| k != &ks[..])
+                    .collect();
+                RLstArgs![vec![]]
+            }
+        };
+    }
 }
 
 /******************************************************************************
