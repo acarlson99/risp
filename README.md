@@ -35,3 +35,4 @@ Type `(help)` for more information when inside the REPL.
 ## Known issues
 - A missing module will not be reported unless loaded explicitly from the REPL.
 - Module paths are relative to the executable and not the files that load the modules.
+- The language is not production ready at all!!!
