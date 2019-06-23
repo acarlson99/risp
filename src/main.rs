@@ -65,8 +65,11 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
 
 # builtin functions:
   # arithmetic: / * - +
+  # bitwise: & | ~ ^
   # io: read write
   # logic: = != < <= > >=
+  # while: (Bool Any)
+  # for: (Sym Num Num Any)
   # at: get the nth element of a Vec
   # car: get the first element of a Lst
   # cdr: get the second element of a Lst
