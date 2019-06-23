@@ -21,7 +21,7 @@ After it's built, you can run it as:
 `./risp` or `./risp filename`
 ## Features
 - Erros as first class values.
-- Strings, Symbols, FBooleans, loats and Integers.
+- Strings, Symbols, Booleans, Floats and Integers.
 - Built-in support for vectors and hashmaps.
 - Quotes and lambdas.
 - Module system.
