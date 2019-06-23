@@ -19,9 +19,16 @@ fn main() {
     match rl.load_history(".repl_history") {
         _ => (),
     }
-    env.load("stdlib/prelude.rs");
+    let std = env.load("stdlib/prelude.rs");
+    if let _RErr(_) = std.clone() {
+        println!("{}", std);
+        return;
+    }
     if let Some(path) = env::args().nth(1) {
-        env.load(path);
+        let res = env.load(path);
+        if let _RErr(_) = res.clone() {
+            println!("{}", res);
+        }
         return;
     }
     println!("{}", REPL0);

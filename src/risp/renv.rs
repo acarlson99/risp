@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use crate::risp::{
     eval, eval_lambda, load_arithmetic, load_constructs, load_io, load_logic, rep, RErr, RLambda,
-    RSym, RVal, RVal::*,
+    RVal, RVal::*,
 };
 
 /******************************************************************************
@@ -140,6 +140,9 @@ impl REnv {
         let mut val = RNil;
         for v in xs[..].iter() {
             val = eval(&v, self);
+            if let _RErr(_) = val.clone() {
+                return val.clone();
+            }
         }
         val
     }
@@ -252,7 +255,7 @@ impl REnv {
             let new_src = vec!["(do\n", &src[..], ")"].join("");
             rep(new_src, self)
         } else {
-            RSym(format!("could not load {}", &new_path))
+            RErr(format!("could not load {}", &new_path))
         }
     }
 }
