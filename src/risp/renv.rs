@@ -59,13 +59,12 @@ impl REnv {
         match &x {
             _RSym(s) => match &s[..] {
                 "at" => self.builtin_at(xs),
-                "car" => self.builtin_car(xs),
-                "cdr" => self.builtin_cdr(xs),
+                "head" => self.builtin_head(xs),
+                "rest" => self.builtin_rest(xs),
                 "do" => self.builtin_do(xs),
                 "let" => self.builtin_def(xs),
                 "if" => self.builtin_if(xs),
                 "fn" => self.builtin_lfn(xs),
-                "mod" => self.builtin_mod(xs),
                 "quote" => self.builtin_quote(xs),
                 "eval" => self.builtin_eval(xs),
                 "get" => self.builtin_get(xs),
@@ -112,28 +111,35 @@ impl REnv {
             _ => RErrExpected!("Int (Vec)", RLstArgs![xs].variant()),
         }
     }
-    fn builtin_car(&self, xs: &[RVal]) -> RVal {
-        match &xs[0] {
-            RLst(vs) => {
+    fn builtin_head(&mut self, xs: &[RVal]) -> RVal {
+        match eval(&xs[0], self) {
+            RLst(vs) | RVec(vs) => {
                 if vs.is_empty() {
                     RLstArgs!(vec![])
                 } else {
-                    vs[0].clone()
+                    eval(&vs[0], self)
                 }
             }
-            _ => RErrExpected!("(Lst)", RLstArgs![xs].variant()),
+            _ => RErrExpected!("(Lst | Vec)", RLstArgs![xs].variant()),
         }
     }
-    fn builtin_cdr(&self, xs: &[RVal]) -> RVal {
-        match &xs[0] {
+    fn builtin_rest(&mut self, xs: &[RVal]) -> RVal {
+        match eval(&xs[0], self) {
             RLst(vs) => {
-                if vs.len() < 3 {
+                if vs.len() < 2 {
                     RLstArgs!(vec![])
                 } else {
-                    vs[1].clone()
+                    RLstArgs!(&vs[1..])
                 }
             }
-            _ => RErrExpected!("(Lst)", RLstArgs![xs].variant()),
+            RVec(vs) => {
+                if vs.len() < 2 {
+                    RLstArgs!(vec![])
+                } else {
+                    eval(&RVecArgs!(&vs[1..]), self)
+                }
+            }
+            _ => RErrExpected!("(Lst | Vec)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
@@ -208,16 +214,6 @@ impl REnv {
                 }
             }
             _ => RNil,
-        }
-    }
-    fn builtin_mod(&mut self, xs: &[RVal]) -> RVal {
-        if xs.len() >= 2 {
-            for v in xs[1..].iter() {
-                eval(v, self);
-            }
-            RNil
-        } else {
-            RErr("invalid module")
         }
     }
     fn builtin_quote(&mut self, xs: &[RVal]) -> RVal {

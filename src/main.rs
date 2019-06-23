@@ -70,7 +70,7 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
   # Fn: (fn (x y) (+ x y))
 
 # builtin functions:
-  # arithmetic: / * - +
+  # arithmetic: / * - + %
   # bitwise: & | ~ ^
   # io: read write
   # logic: not and or ! && || = != < <= > >=
@@ -78,12 +78,11 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
   # while: (Bool Any)
   # for: (Sym Num Num Any)
   # at: get the nth element of a Vec
-  # car: get the first element of a Lst
-  # cdr: get the second element of a Lst
+  # head: get the first element of a Lst or a Vec
+  # rest: get a new version of a Lst or Vec without the head
   # do: evaluate several expressions in sequence, return last one
-  # let: bind a value to a name
+  # let: bind an expression to a label
   # if: check a condition, return first expression if true, else the second
-  # mod: create a module
   # quote: return a value without evaluating it first
   # eval: evaluate a string or a list
   # get: get an element from a Map using a key
