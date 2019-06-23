@@ -50,13 +50,15 @@ fn write(args: &[RVal], env: &mut REnv) -> RVal {
 fn load(args: &[RVal], env: &mut REnv) -> RVal {
     match args.len() {
         1 => match &args[0] {
-            _RSym(path) => match env.load(&path[..]) {
-                _RSym(s) => return RErr(&s[..]),
-                _ => RLstArgs![vec![]],
+            _RSym(path) => {
+                let loaded = env.load(&path[..]);
+                match &loaded {
+                _RSym(s) => RErr(&s[..]),
+                _ => loaded,
+                }
             },
-            _ => return RErrExpected!("(Str)", RLstArgs![args].variant()),
+            _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
         },
-        _ => return RErrExpected!("(Str)", RLstArgs![args].variant()),
-    };
-    RLstArgs![vec![]]
+        _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
+    }
 }

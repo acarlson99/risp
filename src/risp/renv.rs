@@ -8,7 +8,7 @@ use std::fs;
 use std::sync::Arc;
 
 use crate::risp::{
-    eval, eval_lambda, load_arithmetic, load_io, load_logic, load_loops, rep, RErr, RLambda, RSym,
+    eval, eval_lambda, load_arithmetic, load_io, load_logic, load_constructs, rep, RErr, RLambda, RSym,
     RVal, RVal::*,
 };
 
@@ -29,7 +29,7 @@ impl REnv {
         load_arithmetic(&mut env);
         load_logic(&mut env);
         load_io(&mut env);
-        load_loops(&mut env);
+        load_constructs(&mut env);
         env
     }
     pub fn def<S>(&mut self, key: S, val: RVal) -> RVal
@@ -249,7 +249,8 @@ impl REnv {
     {
         let new_path = path.into();
         if let Ok(src) = fs::read_to_string(&new_path) {
-            rep(src, self)
+            let new_src = vec!["(do\n", &src[..], ")"].join("");
+            rep(new_src, self)
         } else {
             RSym(format!("could not load {}", &new_path))
         }
