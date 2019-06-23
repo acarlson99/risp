@@ -86,7 +86,7 @@ impl REnv {
     }
     fn builtin_get(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            2 => match &xs[1] {
+            2 => match eval(&xs[1], self) {
                 RMap(hm) => match hm.get(&eval(&xs[0], self)) {
                     Some(v) => v.clone(),
                     None => RLstArgs!(vec![]),
@@ -96,9 +96,9 @@ impl REnv {
             _ => RErrExpected!("(Any Map)", RLstArgs![xs].variant()),
         }
     }
-    fn builtin_at(&self, xs: &[RVal]) -> RVal {
+    fn builtin_at(&mut self, xs: &[RVal]) -> RVal {
         match xs.len() {
-            2 => match (&xs[0], &xs[1]) {
+            2 => match (&xs[0], &eval(&xs[1], self)) {
                 (RInt(i), RVec(vs)) => {
                     if (*i as usize) >= vs.len() {
                         RErr("index out of bounds")
