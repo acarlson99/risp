@@ -1,5 +1,11 @@
-# Risp
-A Lisp dialect written in Rust
+```
+██████╗ ██╗███████╗██████╗
+██╔══██╗██║██╔════╝██╔══██╗
+██████╔╝██║███████╗██████╔╝
+██╔══██╗██║╚════██║██╔═══╝
+██║  ██║██║███████║██║
+╚═╝  ╚═╝╚═╝╚══════╝╚═╝ A Lisp dialect written in Rust
+```
 ## Installation
 In order to use this interpreter, you must have Rust and Cargo installed. These can be obtained here: https://www.rust-lang.org/tools/install
 
