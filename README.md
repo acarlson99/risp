@@ -5,9 +5,9 @@ In order to use this interpreter, you must have Rust and Cargo installed. These 
 
 To build the project, just do:
 ```
-git clone https://github.com/geostran/risp.git
-cd risp
-cargo build --release
+git clone https://github.com/geostran/risp.git && \
+cd risp && \
+cargo build --release && \
 ln -s target/release/risp risp
 ```
 
