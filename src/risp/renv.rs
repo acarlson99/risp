@@ -8,8 +8,8 @@ use std::fs;
 use std::sync::Arc;
 
 use crate::risp::{
-    eval, eval_lambda, load_arithmetic, load_io, load_logic, rep, RErr, RLambda, RSym, RVal,
-    RVal::*,
+    eval, eval_lambda, load_arithmetic, load_io, load_logic, load_loops, rep, RErr, RLambda, RSym,
+    RVal, RVal::*,
 };
 
 /******************************************************************************
@@ -29,6 +29,7 @@ impl REnv {
         load_arithmetic(&mut env);
         load_logic(&mut env);
         load_io(&mut env);
+        load_loops(&mut env);
         env
     }
     pub fn def<S>(&mut self, key: S, val: RVal) -> RVal
