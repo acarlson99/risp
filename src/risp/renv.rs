@@ -63,7 +63,6 @@ impl REnv {
                 "rest" => self.builtin_rest(xs),
                 "do" => self.builtin_do(xs),
                 "let" => self.builtin_def(xs),
-                "if" => self.builtin_if(xs),
                 "fn" => self.builtin_lfn(xs),
                 "quote" => self.builtin_quote(xs),
                 "eval" => self.builtin_eval(xs),
@@ -162,19 +161,6 @@ impl REnv {
                 _ => RErrExpected!("(Sym Any)", RLstArgs![xs].variant()),
             },
             _ => RErrExpected!("(Sym Any)", RLstArgs![xs].variant()),
-        }
-    }
-    fn builtin_if(&mut self, xs: &[RVal]) -> RVal {
-        match xs.len() {
-            0 => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
-            3 => match eval(&xs[0], self) {
-                RBool(b) => {
-                    let idx = if b { 0 } else { 1 };
-                    eval(&xs[idx + 1], self)
-                }
-                _ => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
-            },
-            _ => RErrExpected!("(Bool Any Any)", RLstArgs![xs].variant()),
         }
     }
     fn builtin_lfn(&mut self, xs: &[RVal]) -> RVal {
