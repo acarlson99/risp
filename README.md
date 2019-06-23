@@ -22,8 +22,7 @@ After it's built, you can run it as:
 - Lexical scoping.
 - Mutual recursion.
 
-The language is Turing-complete, but it does not implement all the features that lisps usually have. For example, it lacks macros, quasiquotes and closures.
-It does have normal quotes and lambdas.
+The language does not implement some features that lisps usually have, such as macros, quasiquotes and closures.
 
 Type `(help)` for more information when inside the REPL.
 
