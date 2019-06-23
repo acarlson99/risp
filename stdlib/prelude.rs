@@ -1,2 +1,3 @@
 (mod prelude
-  (load "stdlib/logic.rs"))
+  (load stdlib/logic.rs)
+)

@@ -20,6 +20,7 @@ fn main() {
         _ => (),
     }
     env.load("stdlib/prelude.rs");
+    //rep("(load stdlib/prelude.rs)", &mut env);
     if let Some(path) = env::args().nth(1) {
         env.load(path);
         return;
