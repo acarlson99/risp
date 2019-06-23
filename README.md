@@ -8,7 +8,7 @@ To build the project, just do:
 git clone https://github.com/geostran/risp.git
 cd risp
 cargo build --release
-ln -s risp target/release/risp
+ln -s target/release/risp risp
 ```
 
 After it's built, you can run it as:
@@ -29,3 +29,4 @@ Type `(help)` for more information when inside the REPL.
 
 ## Known issues
 - A missing module will not be reported unless loaded explicitly from the REPL.
+- Module paths are relative to the executable and not the files that load the modules.
