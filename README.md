@@ -21,7 +21,7 @@ After it's built, you can run it as:
 `./risp` or `./risp filename`
 ## Features
 - Erros as first class values.
-- Strings, Symbols, Floats and Integers.
+- Strings, Symbols, FBooleans, loats and Integers.
 - Built-in support for vectors and hashmaps.
 - Quotes and lambdas.
 - Module system.
@@ -33,6 +33,5 @@ The language does not currently implement some features that lisps usually have,
 Type `(help)` for more information when inside the REPL.
 
 ## Known issues
-- A missing module will not be reported unless loaded explicitly from the REPL.
 - Module paths are relative to the executable and not the files that load the modules.
 - The language is not production ready at all!!!
