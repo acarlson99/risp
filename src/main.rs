@@ -66,7 +66,8 @@ fn help(_: &[RVal], _: &mut REnv) -> RVal {
   # arithmetic: / * - +
   # bitwise: & | ~ ^
   # io: read write
-  # logic: = != < <= > >=
+  # logic: not and or ! && || = != < <= > >=
+  # cond: (Bool Any) ...
   # while: (Bool Any)
   # for: (Sym Num Num Any)
   # at: get the nth element of a Vec

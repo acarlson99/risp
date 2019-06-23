@@ -8,8 +8,8 @@ use std::fs;
 use std::sync::Arc;
 
 use crate::risp::{
-    eval, eval_lambda, load_arithmetic, load_io, load_logic, load_constructs, rep, RErr, RLambda, RSym,
-    RVal, RVal::*,
+    eval, eval_lambda, load_arithmetic, load_constructs, load_io, load_logic, rep, RErr, RLambda,
+    RSym, RVal, RVal::*,
 };
 
 /******************************************************************************

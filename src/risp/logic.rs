@@ -68,6 +68,12 @@ impl PartialOrd for RVal {
 ******************************************************************************/
 
 pub fn load_logic(env: &mut REnv) {
+    env.def("not", RBfn(not));
+    env.def("and", RBfn(and));
+    env.def("or", RBfn(or));
+    env.def("!", RBfn(not));
+    env.def("&&", RBfn(and));
+    env.def("||", RBfn(or));
     env.def("=", RBfn(eq));
     env.def("!=", RBfn(ne));
     env.def("<", RBfn(lt));
@@ -107,3 +113,51 @@ rval_logic! {lt}
 rval_logic! {le}
 rval_logic! {gt}
 rval_logic! {ge}
+
+fn not(args: &[RVal], env: &mut REnv) -> RVal {
+    if args.len() == 1 {
+        match eval(&args[0], env) {
+            RBool(b) => RBool(!b),
+            _ => RErrExpected!("(Bool)"),
+        }
+    } else {
+        RErrExpected!("(Bool)")
+    }
+}
+
+fn and(args: &[RVal], env: &mut REnv) -> RVal {
+    if args.is_empty() {
+        RErrExpected!("(Bool ...)")
+    } else {
+        let mut acc = true;
+        for e in args.iter() {
+            match eval(&e, env) {
+                RBool(b) => {
+                    acc = acc && b;
+                }
+                _ => return RErrExpected!("(Bool)", e.variant()),
+            };
+        }
+        RBool(acc)
+    }
+}
+
+fn or(args: &[RVal], env: &mut REnv) -> RVal {
+    if args.is_empty() {
+        RErrExpected!("(Bool ...)")
+    } else {
+        for e in args.iter() {
+            match eval(&e, env) {
+                RBool(b) => {
+                    if b {
+                        return RBool(true);
+                    } else {
+                        RLstArgs![vec![]]
+                    }
+                }
+                _ => return RErrExpected!("(Bool)", e.variant()),
+            };
+        }
+        RBool(false)
+    }
+}

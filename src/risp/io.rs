@@ -53,10 +53,10 @@ fn load(args: &[RVal], env: &mut REnv) -> RVal {
             _RSym(path) => {
                 let loaded = env.load(&path[..]);
                 match &loaded {
-                _RSym(s) => RErr(&s[..]),
-                _ => loaded,
+                    _RSym(s) => RErr(&s[..]),
+                    _ => loaded,
                 }
-            },
+            }
             _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
         },
         _ => RErrExpected!("(Str)", RLstArgs![args].variant()),

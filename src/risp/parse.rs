@@ -37,7 +37,7 @@ where
 ** @parser
 ******************************************************************************/
 
-pub fn parse<'a>(tokens: &'a [String]) -> Result<(RVal, &'a [String]), RVal> {
+pub fn parse(tokens: &[String]) -> Result<(RVal, &[String]), RVal> {
     let (head, rest) = tokens.split_first().ok_or_else(|| RErrUnexpected!("EOF"))?;
     match &head[..] {
         "(" => read_rest(rest, ")"),
