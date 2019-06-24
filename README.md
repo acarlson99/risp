@@ -7,7 +7,7 @@
 ╚═╝  ╚═╝╚═╝╚══════╝╚═╝ A Lisp dialect written in Rust
 ```
 ## Installation
-In order to use this interpreter, you must have Rust and Cargo installed. These can be obtained here: https://www.rust-lang.org/tools/install
+In order to use this interpreter, you must have Rust and Cargo installed. These can be obtained **[here](https://www.rust-lang.org/tools/install)**.
 
 To build the project, just do:
 ```
@@ -17,21 +17,21 @@ cargo build --release && \
 ln -s target/release/risp risp
 ```
 
-After it's built, you can run it as:
-`./risp` or `./risp filename`
+After it's built, you can run it as: `./risp` or `./risp filename`
+
 ## Features
-- Erros as first class values.
-- Strings, Symbols, Booleans, Floats and Integers.
-- Built-in support for vectors and hashmaps.
-- Quotes and lambdas.
-- Module system.
-- Lexical scoping.
-- Mutual recursion.
+- Erros as first class values
+- Strings, Symbols, Booleans, Floats and Integers
+- Built-in support for vectors and hashmaps
+- Quotes and lambdas
+- Module system
+- Lexical scoping
+- Mutual recursion
 
 The language does not currently implement some features that lisps usually have, such as macros, quasiquotes and closures.
 
 Type `(help)` for more information when inside the REPL.
 
 ## Known issues
-- Module paths are relative to the executable and not the files that load the modules.
+- Module paths are relative to the executable and not the files that load the modules
 - The language is not production ready at all!!!
