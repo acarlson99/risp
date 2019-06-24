@@ -1,10 +1,18 @@
 use crate::risp::{eval, REnv, RErr, RVal, RVal::*};
 
 pub fn load_constructs(env: &mut REnv) {
+    env.def("cons", RBfn(ccons));
     env.def("cond", RBfn(ccond));
     env.def("if", RBfn(cif));
     env.def("for", RBfn(cfor));
     env.def("while", RBfn(cwhile));
+}
+
+fn ccons(xs: &[RVal], env: &mut REnv) -> RVal {
+    match xs.len() {
+        2 => RLstArgs![xs],
+        _ => RErrExpected!["(Any Any)", RLstArgs![xs].variant()]
+    }
 }
 
 fn ccond(xs: &[RVal], env: &mut REnv) -> RVal {
