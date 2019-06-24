@@ -5,4 +5,4 @@
         ((and (= (% i 3) 0) (= (% i 5) 0)) (write "FizzBuzz\n"))
         ((= (% i 3) 0) (write "Fizz\n"))
         ((= (% i 5) 0) (write "Buzz\n"))
-        (otherwise (write ""))))))
+        (true (write i "\n"))))))

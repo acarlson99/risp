@@ -16,7 +16,7 @@ fn ccond(xs: &[RVal], env: &mut REnv) -> RVal {
                 RLst(vs) => if vs.len() == 2 {
                     if let RBool(b) = eval(&vs[0], env) {
                         if b {
-                            eval(&vs[1], env)
+                            return eval(&vs[1], env);
                         } else {
                             RLstArgs![vec![]]
                         }
