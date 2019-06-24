@@ -1,9 +1,39 @@
 use crate::risp::{eval, REnv, RErr, RVal, RVal::*};
 
 pub fn load_constructs(env: &mut REnv) {
+    env.def("cond", RBfn(ccond));
     env.def("if", RBfn(cif));
     env.def("for", RBfn(cfor));
     env.def("while", RBfn(cwhile));
+}
+
+fn ccond(xs: &[RVal], env: &mut REnv) -> RVal {
+    if xs.is_empty() {
+        RErrExpected!("((Bool Any) ...)", RLstArgs![xs].variant())
+    } else {
+        for pair in xs.iter() {
+            let tmp = match &pair {
+                RLst(vs) => if vs.len() == 2 {
+                    if let RBool(b) = eval(&vs[0], env) {
+                        if b {
+                            eval(&vs[1], env)
+                        } else {
+                            RLstArgs![vec![]]
+                        }
+                    } else {
+                        RErrExpected!("(Bool Any)", pair.variant())
+                    }
+                } else {
+                    RErrExpected!("(Bool Any)", pair.variant())
+                }
+                _ => RErrExpected!("(Bool Any)", pair.variant())
+            };
+            if tmp != RLstArgs![vec![]] {
+                return tmp.clone();
+            }
+        }
+        RLstArgs![vec![]]
+    }
 }
 
 fn cif(xs: &[RVal], env: &mut REnv) -> RVal {
