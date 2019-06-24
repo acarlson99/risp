@@ -226,7 +226,7 @@ impl REnv {
             1 => match &xs[0] {
                 _RStr(s) => rep(&s[..], self),
                 RLst(_) => {
-                    let _x0 = rep(&xs[0].to_string(), self);
+                    let _x0 = eval(&xs[0], self);
                     eval(&_x0, self)
                 }
                 _ => eval(&xs[0], self),

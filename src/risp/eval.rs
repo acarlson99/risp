@@ -31,7 +31,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 return val.clone();
             }
             let _r = env
-                .get(&s.to_string())
+                .get(&s[..])
                 .ok_or_else(|| RErrUnboundSymbol!(s))
                 .map(|x| x.clone());
             match _r {

@@ -8,7 +8,7 @@ pub fn load_constructs(env: &mut REnv) {
     env.def("while", RBfn(cwhile));
 }
 
-fn ccons(xs: &[RVal], env: &mut REnv) -> RVal {
+fn ccons(xs: &[RVal], _: &mut REnv) -> RVal {
     match xs.len() {
         2 => RLstArgs![xs],
         _ => RErrExpected!["(Any Any)", RLstArgs![xs].variant()]
