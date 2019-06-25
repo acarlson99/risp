@@ -13,7 +13,9 @@ fn ccons(xs: &[RVal], env: &mut REnv) -> RVal {
         2 => {
             let mut vs = vec![];
             for v in xs.iter() {
-                vs.push(eval(&v, env));
+                if v != &RLstArgs![vec![]] {
+                    vs.push(eval(&v, env));
+                }
             }
             RLstArgs![vs]
         },
