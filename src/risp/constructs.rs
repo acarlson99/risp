@@ -8,9 +8,15 @@ pub fn load_constructs(env: &mut REnv) {
     env.def("while", RBfn(cwhile));
 }
 
-fn ccons(xs: &[RVal], _: &mut REnv) -> RVal {
+fn ccons(xs: &[RVal], env: &mut REnv) -> RVal {
     match xs.len() {
-        2 => RLstArgs![xs],
+        2 => {
+            let mut vs = vec![];
+            for v in xs.iter() {
+                vs.push(eval(&v, env));
+            }
+            RLstArgs![vs]
+        },
         _ => RErrExpected!["(Any Any)", RLstArgs![xs].variant()]
     }
 }
