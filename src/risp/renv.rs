@@ -124,6 +124,9 @@ impl REnv {
         }
     }
     fn builtin_head(&mut self, xs: &[RVal]) -> RVal {
+        if xs.is_empty() {
+            return RErrExpected!("(Lst | Vec)", RLstArgs![xs].variant());
+        }
         match eval(&xs[0], self) {
             RLst(vs) | RVec(vs) => {
                 if vs.is_empty() {
@@ -136,6 +139,9 @@ impl REnv {
         }
     }
     fn builtin_rest(&mut self, xs: &[RVal]) -> RVal {
+        if xs.is_empty() {
+            return RErrExpected!("(Lst | Vec)", RLstArgs![xs].variant());
+        }
         match eval(&xs[0], self) {
             RLst(vs) => {
                 if vs.len() < 2 {
@@ -156,6 +162,9 @@ impl REnv {
     }
     fn builtin_do(&mut self, xs: &[RVal]) -> RVal {
         let mut val = RNil;
+        if xs.is_empty() {
+            return RErrExpected!("(Any)", RLstArgs![xs].variant());
+        }
         for v in xs[..].iter() {
             val = eval(&v, self);
             if let _RErr(_) = val.clone() {

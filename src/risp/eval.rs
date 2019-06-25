@@ -50,7 +50,7 @@ pub fn eval(val: &RVal, env: &mut REnv) -> RVal {
                 RNil => match env.is_function(&x) {
                     RBfn(f) => f(xs, env),
                     RLfn(lambda) => eval_lambda(&lambda, xs, env),
-                    _ => RErrExpected!("Fn", x.variant()),
+                    _ => RErrExpected!("(Fn)", x.variant()),
                 },
                 _ => is_builtin,
             }
