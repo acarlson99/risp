@@ -132,7 +132,7 @@ impl REnv {
                 if vs.is_empty() {
                     RLstArgs!(vec![])
                 } else {
-                    eval(&vs[0], self)
+                    vs[0].clone()
                 }
             }
             _ => RErrExpected!("(Lst | Vec)", RLstArgs![xs].variant()),
