@@ -51,8 +51,8 @@ fn load(args: &[RVal], env: &mut REnv) -> RVal {
     match args.len() {
         1 => match &args[0] {
             _RSym(path) => env.load(&path[..]),
-            _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
+            _ => RErrExpected!("(Sym)", RLstArgs![args].variant()),
         },
-        _ => RErrExpected!("(Str)", RLstArgs![args].variant()),
+        _ => RErrExpected!("(Sym)", RLstArgs![args].variant()),
     }
 }
