@@ -5,4 +5,4 @@
 
 (let len (fn (x) (if (= x ()) 0 (+ (len (cdr x)) 1))))
 
-(let list (fn (x) (cons x ())))
+(let list (fn (x) (cons x ()))) ;; NOTE: does not work with multiple elements
